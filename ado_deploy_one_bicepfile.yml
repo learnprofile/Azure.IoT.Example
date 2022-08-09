@@ -1,0 +1,48 @@
+# --------------------------------------------------------------------------------
+# Partial Pipeline to deploy Azure Resources defined in one Bicep File
+# --------------------------------------------------------------------------------
+parameters:
+  bicepFileName: 'myBicepFileName'
+  environmentCode: 'dev'
+  environmentUpper: 'DEV'
+  subscriptionName: 'My Subscription Name (mySubscriptionId)'
+  subscriptionId: 'mySubscriptionId'
+  resourceGroupName: 'rg_myResourceGroup'
+  regionName: 'eastus'
+  regionTitle: 'East US'
+  orgPrefix: 'org'
+  appPrefix: 'app'
+  appSuffix: '1'
+  sku: ''
+  runDateTime: '12-31-2021 23:59:59'
+  ignoreError: false
+
+steps:
+- script: az bicep build --file Bicep/${{parameters.bicepFileName}}.bicep --outfile Bicep/${{parameters.bicepFileName}}.json
+  displayName: 'Compile ${{parameters.bicepFileName}} Bicep file to ARM'
+# - script: |  
+#     echo 'Parameters for ARM Template: ${{parameters.bicepFileName}}.json'
+#     echo '  environmentCode: ${{parameters.environmentCode}}'
+#     echo '  environmentUpper: ${{parameters.environmentUpper}}'
+#     echo '  resourceGroupName: ${{parameters.resourceGroupName}}'
+#     echo '  regionName: ${{parameters.regionName}}'
+#     echo '  regionTitle: ${{parameters.regionTitle}}'
+#     echo '  orgPrefix: ${{parameters.orgPrefix}}'
+#     echo '  appPrefix: ${{parameters.appPrefix}}'
+#     echo '  appSuffix: ${{parameters.appSuffix}}'
+#     echo '  sku: ${{parameters.sku}}'
+#     echo '  runDateTime: ${{parameters.runDateTime}}'
+- task: AzureResourceManagerTemplateDeployment@3
+  displayName: 'Deploy ${{parameters.bicepFileName}} ARM Template'
+  inputs:
+    deploymentScope: 'Resource Group'
+    azureResourceManagerConnection: '${{parameters.subscriptionName}}'
+    subscriptionId: '${{parameters.subscriptionId}}'
+    action: 'Create Or Update Resource Group'
+    resourceGroupName: '${{parameters.resourceGroupName}}'
+    location: '${{parameters.regionTitle}}'
+    templateLocation: 'Linked artifact'
+    csmFile: 'Bicep/${{parameters.bicepFileName}}.json'
+    overrideParameters: '-sku ${{parameters.sku}} -regionName ${{parameters.regionName}} -orgPrefix ${{parameters.orgPrefix}} -appPrefix ${{parameters.appPrefix}} -environmentCode ${{parameters.environmentCode}} -appSuffix ${{parameters.appSuffix}} -runDateTime ${{parameters.runDateTime}} -templateFile ${{parameters.bicepFileName}}.bicep'
+    deploymentMode: 'Incremental'
+    continueOnError: ignoreError

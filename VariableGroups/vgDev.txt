@@ -1,0 +1,14 @@
+Variables
+    appPrefixDev            iot
+    appSuffixDev            1
+    environmentCodeDev      dev
+    environmentUpperDev     DEV
+    iotHubSkuDev            F1
+    orgPrefixDev            myorg
+    regionNameDev           eastus
+    regionTitleDev          East US
+    resourceGroupNameDev    rg_iotdev
+    signalRSkuDev           Free_F1
+    subscriptionIdDev       <mySubscriptionGuid>
+    subscriptionNameDev     <mySubscriptionName> (<mySubscriptionGuid>)
+    webAppSkuDev            S1
