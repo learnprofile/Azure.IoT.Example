@@ -1,11 +1,12 @@
 // --------------------------------------------------------------------------------
 // Main file that deploys all Azure Resources for one environment
+// TODO: Bug - fails if resource group doesn't exist...  need to put that in here!
 // --------------------------------------------------------------------------------
 // To deploy this Bicep manually:
 // 	 az login
 //   az account set --subscription d1ced742-2c89-420b-a12a-6d9dc6d48c43
-//   az deployment group create -n main-deploy-20220805T140000Z --reswebSiteSkuource-group rg_iotdemo_dev --template-file 'main.bicep' --parameters environmentCode=dev orgPrefix=lll appPrefix=iotdemo
-//   az deployment group create -n main-deploy-20220805T140000Z --resource-group rg_iotdemo_qa --template-file 'main.bicep' --parameters environmentCode=qa orgPrefix=lll appPrefix=iotdemo
+//   az deployment group create -n main-deploy-20220809T170000Z --resource-group rg_iotdemo_dev --template-file 'main.bicep' --parameters environmentCode=dev orgPrefix=lll appPrefix=iotdemo
+//   az deployment group create -n main-deploy-20220809T170000Z --resource-group rg_iotdemo_qa --template-file 'main.bicep' --parameters environmentCode=qa orgPrefix=lll appPrefix=iotdemo
 // --------------------------------------------------------------------------------
 param environmentCode string = 'dev'
 param location string = resourceGroup().location
@@ -22,8 +23,20 @@ param runDateTime string = utcNow()
 var deploymentSuffix = '-deploy-${runDateTime}'
 
 // --------------------------------------------------------------------------------
+// doesn't work right yet...!
+// module resourceGroupModule 'resourceGroup.bicep' = {
+//   name: 'resourceGroup${deploymentSuffix}'
+//   params: {
+//     templateFileName: '~resourceGroup.bicep'
+//     appPrefix: appPrefix
+//     environmentCode: environmentCode
+//     location: 'eastus'
+//     runDateTime: runDateTime
+//   }
+// }
 module servicebusModule 'serviceBus.bicep' = {
   name: 'servicebus${deploymentSuffix}'
+  // dependsOn: [ resourceGroupModule ]
   params: {
     queueNames: [ 'iotmsgs', 'filemsgs' ]
 
@@ -38,6 +51,7 @@ module servicebusModule 'serviceBus.bicep' = {
 }
 module iotHubModule 'iotHub.bicep' = {
   name: 'iotHub${deploymentSuffix}'
+  // dependsOn: [ resourceGroupModule ]
   params: {
     templateFileName: '~iotHub.bicep'
     orgPrefix: orgPrefix
@@ -69,6 +83,7 @@ var cosmosContainerArray = [
 ]
 module cosmosModule 'cosmosDatabase.bicep' = {
   name: 'cosmos${deploymentSuffix}'
+  // dependsOn: [ resourceGroupModule ]
   params: {
     containerArray: cosmosContainerArray
 
@@ -83,6 +98,7 @@ module cosmosModule 'cosmosDatabase.bicep' = {
 }
 module signalRModule 'signalR.bicep' = {
   name: 'signalR${deploymentSuffix}'
+  // dependsOn: [ resourceGroupModule ]
   params: {
     templateFileName: '~signalR.bicep'
     orgPrefix: orgPrefix
@@ -95,6 +111,7 @@ module signalRModule 'signalR.bicep' = {
 }
 module streamingModule 'streaming.bicep' = {
   name: 'streaming${deploymentSuffix}'
+  // dependsOn: [ resourceGroupModule ]
   params: {
     iotHubName: iotHubModule.outputs.iotHubName
     svcBusName: servicebusModule.outputs.serviceBusName
@@ -111,7 +128,7 @@ module streamingModule 'streaming.bicep' = {
 }
 module functionModule 'functionApp.bicep' = {
   name: 'function${deploymentSuffix}'
-  // dependsOn: [ storageModule ]
+  // dependsOn: [ resourceGroupModule ]
   params: {
     functionAppSku: functionAppSku
     functionAppSkuFamily: functionAppSkuFamily
@@ -129,6 +146,7 @@ module functionModule 'functionApp.bicep' = {
 }
 module webSiteModule 'webSite.bicep' = {
   name: 'webSite${deploymentSuffix}'
+  // dependsOn: [ resourceGroupModule ]
   params: {
     appInsightsLocation: location
     sku: webSiteSku
@@ -150,7 +168,7 @@ var owner2UserObjectId = '209019b5-167b-45cd-ab9c-f987fa262040' // Chris's AD Gu
 
 module keyVaultModule 'keyVault.bicep' = {
   name: 'keyvault${deploymentSuffix}'
-  dependsOn: [servicebusModule, iotHubModule, dpsModule, cosmosModule, functionModule, webSiteModule]
+  dependsOn: [ servicebusModule, iotHubModule, dpsModule, cosmosModule, functionModule, webSiteModule ]
   params: {
     webSiteAppPrincipalId: webSiteModule.outputs.websiteAppPrincipalId
     functionAppPrincipalId: functionModule.outputs.functionAppPrincipalId
@@ -168,7 +186,7 @@ module keyVaultModule 'keyVault.bicep' = {
 }
 module keyVaultSecretsModule 'keyVaultSecrets.bicep' = {
   name: 'keyvaultSecrets${deploymentSuffix}'
-  dependsOn: [ keyVaultModule, servicebusModule, iotHubModule, dpsModule, cosmosModule, functionModule, webSiteModule]
+  dependsOn: [ keyVaultModule, servicebusModule, iotHubModule, dpsModule, cosmosModule, functionModule, webSiteModule ]
   params: {
     keyVaultName: keyVaultModule.outputs.keyVaultName
     iotHubName: iotHubModule.outputs.iotHubName

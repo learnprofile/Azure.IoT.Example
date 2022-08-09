@@ -18,7 +18,7 @@ param webAppName string = 'dashboard'
 
 // --------------------------------------------------------------------------------
 var linuxFxVersion = 'DOTNETCORE|6.0' // 	The runtime stack of web app
-var webSiteName = toLower('${orgPrefix}${appPrefix}${webAppName}${environmentCode}${appSuffix}')
+var webSiteName = toLower('${orgPrefix}-${appPrefix}-${webAppName}-${environmentCode}${appSuffix}')
 var webSiteAppServicePlanName = toLower('${webSiteName}-appsvc')
 var webSiteAppInsightsName = toLower('${webSiteName}-insights')
 

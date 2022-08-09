@@ -18,13 +18,9 @@ param templateFileName string = '~iothub.bicep'
 param sku string = 'S1'
 
 // --------------------------------------------------------------------------------
-var iotHubName  = '${orgPrefix}${appPrefix}hub${environmentCode}${appSuffix}'
-var iotStorageAccountName = '${orgPrefix}${appPrefix}hub${environmentCode}${appSuffix}store'
+var iotHubName            = '${orgPrefix}-${appPrefix}-hub-${environmentCode}${appSuffix}'
+var iotStorageAccountName = '${orgPrefix}${appPrefix}storehub${environmentCode}${appSuffix}'
 var iotStorageContainerName = 'iothubuploads'
-
-// --------------------------------------------------------------------------------
-//var svcBusName = '${orgPrefix}${appPrefix}svcbus${environmentCode}${appSuffix}'
-//resource svcBusResource 'Microsoft.ServiceBus/namespaces@2021-11-01' existing = { name: svcBusName }
 
 // --------------------------------------------------------------------------------
 // create a storage account for the Iot Hub to use
@@ -140,6 +136,7 @@ resource iotHubResource 'Microsoft.Devices/IotHubs@2021-07-02' = {
   }
 }
 
+// --------------------------------------------------------------------------------
 output iotHubName string = iotHubName
 output iotStorageAccountName string = iotStorageAccountName
 output iotStorageContainerName string = iotStorageContainerName

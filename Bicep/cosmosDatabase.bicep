@@ -17,8 +17,8 @@ param templateFileName string = '~cosmosDatabase.bicep'
 param containerArray array
 
 // --------------------------------------------------------------------------------
-var cosmosAccountName = '${orgPrefix}-${appPrefix}-cosmos-acct${environmentCode}${appSuffix}'
-var cosmosDatabaseName = '${orgPrefix}-${appPrefix}-cosmos-db${environmentCode}${appSuffix}'
+var cosmosAccountName = '${orgPrefix}-${appPrefix}-cosmos-${environmentCode}${appSuffix}'
+var cosmosDatabaseName = 'IoTDatabase'
 
 // --------------------------------------------------------------------------------
 resource cosmosAccountResource 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' = {
@@ -125,4 +125,5 @@ resource containerResources 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/
     }
 }]
 
+// --------------------------------------------------------------------------------
 output cosmosAccountName string = cosmosAccountName

@@ -1,5 +1,6 @@
 // ----------------------------------------------------------------------------------------------------
 // This BICEP file will create an Azure Function for the IoT Demo Project
+// ----------------------------------------------------------------------------------------------------
 // TODO: can I split the unique configuration keys out into a separate file to make this more generic?
 // ----------------------------------------------------------------------------------------------------
 param orgPrefix string = 'org'
@@ -22,16 +23,12 @@ param storageAccountType string = 'Standard_LRS'
 // --------------------------------------------------------------------------------
 var functionName = 'process'
 var functionAppName = toLower('${orgPrefix}-${appPrefix}-${functionName}-${environmentCode}${appSuffix}')
+var functionStorageAccountName = toLower('${orgPrefix}${appPrefix}storefun${environmentCode}${appSuffix}')
 var appServicePlanName = toLower('${functionAppName}-appsvc')
 var functionInsightsName = toLower('${functionAppName}-insights')
-var functionStorageAccountName = toLower('${orgPrefix}${appPrefix}funcstore${environmentCode}${appSuffix}')
 var keyVaultName = '${orgPrefix}${appPrefix}vault${environmentCode}${appSuffix}'
 
 // --------------------------------------------------------------------------------
-// var iotHubName = '${orgPrefix}${appPrefix}hub${environmentCode}${appSuffix}'
-// resource iotHubResource 'Microsoft.Devices/IotHubs@2021-07-02' existing = { name: iotHubName }
-// var iotHubConnectionString = 'HostName=${iotHubResource.name}.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=${listKeys(iotHubResource.id, iotHubResource.apiVersion).value[0].primaryKey}'
-
 var iotHubKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotHubConnectionString)'
 var signalRKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=signalRConnectionString)'
 var serviceBusKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=serviceBusConnectionString)'
@@ -64,9 +61,7 @@ resource appInsightsResource 'Microsoft.Insights/components@2020-02-02-preview' 
   }
   properties: {
     Application_Type: 'web'
-    //RetentionInDays: 90
-    publicNetworkAccessForIngestion: 'Enabled'
-    publicNetworkAccessForQuery: 'Enabled'
+    Request_Source: 'rest'
   }
 }
 
@@ -82,17 +77,10 @@ resource appServiceResource 'Microsoft.Web/serverfarms@2021-03-01' = {
   sku: {
     name: functionAppSku
     tier: functionAppSkuTier
-    size: functionAppSku
-    family: functionAppSkuFamily
-    capacity: 0
   }
   properties: {
     perSiteScaling: false
-    maximumElasticWorkerCount: 1
-    isSpot: false
-    reserved: true
-    isXenon: false
-    hyperV: false
+    reserved: false
     targetWorkerCount: 0
     targetWorkerSizeId: 0
   }
@@ -101,8 +89,8 @@ resource appServiceResource 'Microsoft.Web/serverfarms@2021-03-01' = {
 resource functionAppResource 'Microsoft.Web/sites@2021-03-01' = {
   name: functionAppName
   location: location
-  //kind: 'functionapp'
-  kind: 'functionapp,linux'
+  kind: 'functionapp'
+  //kind: 'functionapp,linux'
   tags: {
     LastDeployed: runDateTime
     TemplateFile: templateFileName
@@ -113,22 +101,7 @@ resource functionAppResource 'Microsoft.Web/sites@2021-03-01' = {
   }
   properties: {
     enabled: true
-    hostNameSslStates: [
-      {
-        name: '${functionAppName}.azurewebsites.net'
-        sslState: 'Disabled'
-        hostType: 'Standard'
-      }
-      {
-        name: '${functionAppName}.scm.azurewebsites.net'
-        sslState: 'Disabled'
-        hostType: 'Repository'
-      }
-    ]
     serverFarmId: appServiceResource.id
-    reserved: false
-    isXenon: false
-    hyperV: false
     siteConfig: {
       appSettings: [
         {

@@ -19,7 +19,7 @@ param sku string = 'S1'
 param iotHubName string
 
 // --------------------------------------------------------------------------------
-var dpsName  = '${orgPrefix}${appPrefix}dps${environmentCode}${appSuffix}'
+var dpsName  = '${orgPrefix}-${appPrefix}-dps-${environmentCode}${appSuffix}'
 //var certName = '${orgPrefix}-device-root-cert'
 
 //var iotHubName = '${orgPrefix}${appPrefix}hub${environmentCode}${appSuffix}'
@@ -115,4 +115,5 @@ resource dpsResource 'Microsoft.Devices/provisioningServices@2022-02-05' = {
 //   }
 // }
 
+// --------------------------------------------------------------------------------
 output dpsName string = dpsName

@@ -17,7 +17,7 @@ param svcBusName string
 param svcBusQueueName string
 
 // --------------------------------------------------------------------------------
-var saJobName = '${orgPrefix}${appPrefix}stream${environmentCode}${appSuffix}'
+var saJobName = '${orgPrefix}-${appPrefix}-stream-${environmentCode}${appSuffix}'
 
 // --------------------------------------------------------------------------------
 resource iotHubResource 'Microsoft.Devices/IotHubs@2021-07-02' existing = { name: iotHubName }
