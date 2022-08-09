@@ -43,6 +43,6 @@ steps:
     location: '${{parameters.regionTitle}}'
     templateLocation: 'Linked artifact'
     csmFile: 'Bicep/${{parameters.bicepFileName}}.json'
-    overrideParameters: '-sku ${{parameters.sku}} -regionName ${{parameters.regionName}} -orgPrefix ${{parameters.orgPrefix}} -appPrefix ${{parameters.appPrefix}} -environmentCode ${{parameters.environmentCode}} -appSuffix ${{parameters.appSuffix}} -runDateTime ${{parameters.runDateTime}} -templateFile ${{parameters.bicepFileName}}.bicep'
+    overrideParameters: '-sku ${{parameters.sku}} -regionName ${{parameters.regionName}} -orgPrefix ${{parameters.orgPrefix}} -appPrefix ${{parameters.appPrefix}} -environmentCode ${{parameters.environmentCode}} -appSuffix ${{parameters.appSuffix}} -runDateTime ${{parameters.runDateTime}} -templateFileName ${{parameters.bicepFileName}}.bicep'
     deploymentMode: 'Incremental'
     continueOnError: ignoreError

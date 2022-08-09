@@ -15,7 +15,7 @@ param environmentCode string = 'dev'
 param appSuffix string = '1'
 param regionName string = resourceGroup().location
 param runDateTime string = utcNow()
-param templateFile string = '~iothub.bicep'
+param templateFileName string = '~iothub.bicep'
 @allowed(['F1','S1','S2','S3'])
 param sku string = 'S1'
 
@@ -35,7 +35,7 @@ resource iotStorageAccountResource 'Microsoft.Storage/storageAccounts@2021-04-01
   location: regionName
   tags: {
     LastDeployed: runDateTime
-    TemplateFile: templateFile
+    TemplateFile: templateFileName
     SKU: sku
   }
   sku: {
@@ -62,7 +62,7 @@ resource iotHubResource 'Microsoft.Devices/IotHubs@2021-07-02' = {
   location: regionName
   tags: {
     LastDeployed: runDateTime
-    TemplateFile: templateFile
+    TemplateFile: templateFileName
   }
   sku: {
     name: sku

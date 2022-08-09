@@ -11,7 +11,7 @@ param environmentCode string = 'dev'
 param appSuffix string = '1'
 param regionName string = resourceGroup().location
 param runDateTime string = utcNow()
-param templateFile string = '~eventGridSubscription.bicep'
+param templateFileName string = '~eventGridSubscription.bicep'
 param sku string = ''
 
 // --------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ resource eventGridSystemTopicResource 'Microsoft.EventGrid/systemTopics@2021-12-
   location: regionName
   tags: {
     LastDeployed: runDateTime
-    TemplateFile: templateFile
+    TemplateFile: templateFileName
     SKU: sku
   }
   identity: {

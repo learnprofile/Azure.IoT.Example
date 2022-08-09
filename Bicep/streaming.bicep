@@ -11,7 +11,7 @@ param environmentCode string = 'dev'
 param appSuffix string = '1'
 param regionName string = resourceGroup().location
 param runDateTime string = utcNow()
-param templateFile string = '~streaming.bicep'
+param templateFileName string = '~streaming.bicep'
 param sku string = 'F1'
 
 // --------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ resource saJobResource 'Microsoft.StreamAnalytics/streamingjobs@2021-10-01-previ
   location: regionName
   tags: {
     LastDeployed: runDateTime
-    TemplateFile: templateFile
+    TemplateFile: templateFileName
     SKU: sku
   }
   identity: {

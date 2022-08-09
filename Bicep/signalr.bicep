@@ -11,7 +11,7 @@ param environmentCode string = 'dev'
 param appSuffix string = '1'
 param regionName string = resourceGroup().location
 param runDateTime string = utcNow()
-param templateFile string = '~signalr.bicep'
+param templateFileName string = '~signalr.bicep'
 param sku string = 'Free_F1'	 // Required, the name of the SKU. Allowed values: Standard_S1, Free_F1
 
 param skuTier	string = 'Free'  // Optional tier of this particular SKU. 'Standard' or 'Free' or 'Premium'
@@ -26,7 +26,7 @@ resource signalRResource 'Microsoft.SignalRService/SignalR@2022-02-01' = {
   location: regionName
   tags: {
     LastDeployed: runDateTime
-    TemplateFile: templateFile
+    TemplateFile: templateFileName
     SKU: sku
   }
   sku: {

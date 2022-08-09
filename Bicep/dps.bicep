@@ -15,7 +15,7 @@ param environmentCode string = 'dev'
 param appSuffix string = '1'
 param regionName string = resourceGroup().location
 param runDateTime string = utcNow()
-param templateFile string = '~dps.bicep'
+param templateFileName string = '~dps.bicep'
 @allowed(['F1','S1','S2','S3'])
 param sku string = 'S1'
 
@@ -34,7 +34,7 @@ resource dpsResource 'Microsoft.Devices/provisioningServices@2022-02-05' = {
   location: regionName
   tags: {
     LastDeployed: runDateTime
-    TemplateFile: templateFile
+    TemplateFile: templateFileName
     SKU: sku
   }
   sku: {

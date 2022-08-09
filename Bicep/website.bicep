@@ -11,7 +11,7 @@ param environmentCode string = 'dev'
 param appSuffix string = '1'
 param regionName string = resourceGroup().location
 param runDateTime string = utcNow()
-param templateFile string = '~website.bicep'
+param templateFileName string = '~website.bicep'
 @allowed(['F1','S1','S2','S3'])
 param sku string = 'F1'
 
@@ -37,7 +37,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   location: regionName
   tags: {
     LastDeployed: runDateTime
-    TemplateFile: templateFile
+    TemplateFile: templateFileName
     SKU: sku
   }
   sku: {
@@ -95,7 +95,7 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   location: appInsightsLocation
   tags: {
     LastDeployed: runDateTime
-    TemplateFile: templateFile
+    TemplateFile: templateFileName
   }
   kind: 'web'
   properties: {
