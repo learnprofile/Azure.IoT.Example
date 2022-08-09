@@ -127,7 +127,7 @@ module functionModule 'functionApp.bicep' = {
     runDateTime: runDateTime
   }
 }
-module webSiteModule 'webSite1.bicep' = {
+module webSiteModule 'webSite.bicep' = {
   name: 'webSite${deploymentSuffix}'
   params: {
     appInsightsLocation: location
