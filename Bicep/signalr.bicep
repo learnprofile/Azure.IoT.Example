@@ -1,7 +1,5 @@
 // --------------------------------------------------------------------------------
 // This BICEP file will create a SignalR host
-// To create the ARM template, run this command:
-//   az bicep build --file signalr.bicep --outfile signalr.json
 // --------------------------------------------------------------------------------
 
 param orgPrefix string = 'org'
@@ -9,7 +7,7 @@ param appPrefix string = 'app'
 @allowed(['dev','qa','stg','prod'])
 param environmentCode string = 'dev'
 param appSuffix string = '1'
-param regionName string = resourceGroup().location
+param location string = resourceGroup().location
 param runDateTime string = utcNow()
 param templateFileName string = '~signalr.bicep'
 param sku string = 'Free_F1'	 // Required, the name of the SKU. Allowed values: Standard_S1, Free_F1
@@ -23,7 +21,7 @@ var signalRName = '${orgPrefix}${appPrefix}signal${environmentCode}${appSuffix}'
 // --------------------------------------------------------------------------------
 resource signalRResource 'Microsoft.SignalRService/SignalR@2022-02-01' = {
   name: signalRName
-  location: regionName
+  location: location
   tags: {
     LastDeployed: runDateTime
     TemplateFile: templateFileName
@@ -77,3 +75,4 @@ resource signalRResource 'Microsoft.SignalRService/SignalR@2022-02-01' = {
     disableAadAuth: false
   }
 }
+output signalRName string = signalRName

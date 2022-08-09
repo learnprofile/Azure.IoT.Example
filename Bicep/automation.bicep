@@ -3,8 +3,6 @@
 // // See also: stackoverflow.com/questions/70119888/bicep-template-for-azure-automation-account-azure-role-assignment-to-managed-id
 // // --------------------------------------------------------------------------------
 // // This BICEP file will (eventually!) create a Azure Automation Account
-// // To create the ARM template, run this command:
-// //   az bicep build --file automation.bicep --outfile automation.json
 // // --------------------------------------------------------------------------------
 
 // param orgPrefix string = 'org'
@@ -12,7 +10,7 @@
 // @allowed(['dev','qa','stg','prod'])
 // param environmentCode string = 'dev'
 // param appSuffix string = '1'
-// param regionName string = resourceGroup().location
+// param location string = resourceGroup().location
 // param runDateTime string = utcNow()
 // param templateFileName string = '~automation.bicep'
 // param sku string = 'F1'
@@ -23,7 +21,7 @@
 
 // resource automationResource 'Microsoft.Automation/automationAccounts@2021-06-22' = {
 //   name: automationName
-//   location: regionName
+//   location: location
 //   tags: {
 //     LastDeployed: runDateTime
 //     TemplateFile: templateFileName
@@ -1015,7 +1013,7 @@
 // resource automationAccountResourceAutomationTutorialWithIdentity 'Microsoft.Automation/automationAccounts/runbooks@2019-06-01' = {
 //   parent: automationResource
 //   name: 'AzureAutomationTutorialWithIdentity'
-//   location: regionName
+//   location: location
 //   tags: {
 //     LastDeployed: runDateTime
 //     TemplateFile: templateFileName
@@ -1031,7 +1029,7 @@
 // resource automationAccountResourceAutomationTutorialWithIdentityGraphical 'Microsoft.Automation/automationAccounts/runbooks@2019-06-01' = {
 //   parent: automationResource
 //   name: 'AzureAutomationTutorialWithIdentityGraphical'
-//   location: regionName
+//   location: location
 //   tags: {
 //     LastDeployed: runDateTime
 //     TemplateFile: templateFileName

@@ -11,6 +11,7 @@ param runDateTime string = utcNow()
 param templateFileName string = '~keyVault.bicep'
 
 param functionAppPrincipalId string 
+param webSiteAppPrincipalId string 
 param owner1UserObjectId string = 'd4aaf634-e777-4307-bb6e-7bf2305d166e' // Lyle's AD Guid
 param owner2UserObjectId string = '209019b5-167b-45cd-ab9c-f987fa262040' // Chris's AD Guid
 
@@ -39,6 +40,15 @@ resource keyvaultResource 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
       {
         tenantId: subscription().tenantId
         objectId:  functionAppPrincipalId
+        permissions: {
+          secrets: [ 'get' ]
+          certificates: [ 'get' ]
+          keys: [ 'get' ]
+        }
+      }
+      {
+        tenantId: subscription().tenantId
+        objectId:  webSiteAppPrincipalId
         permissions: {
           secrets: [ 'get' ]
           certificates: [ 'get' ]

@@ -67,7 +67,7 @@ resource svcBusQueueResource 'Microsoft.ServiceBus/namespaces/queues@2022-01-01-
   }
 }]
 
-output serviceBusName string = serviceBusName
 var serviceBusEndpoint = '${svcBusResource.id}/AuthorizationRules/RootManageSharedAccessKey' 
-output serviceBusEndpoint string = serviceBusEndpoint
 
+output serviceBusName string = serviceBusName
+output serviceBusEndpoint string = serviceBusEndpoint

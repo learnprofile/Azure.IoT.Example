@@ -1,7 +1,5 @@
 // --------------------------------------------------------------------------------
 // This BICEP file will create a linked IoT Hub and DPS Service
-// To create the ARM template, run this command:
-//   az bicep build --file iothub.bicep --outfile iothub.json
 // --------------------------------------------------------------------------------
 // NOTE: there is no way yet to automate DPS Enrollment Group creation.
 //   After DPS is created, you will need to manually create a group based on
@@ -13,7 +11,7 @@ param appPrefix string = 'app'
 @allowed(['dev','qa','stg','prod'])
 param environmentCode string = 'dev'
 param appSuffix string = '1'
-param regionName string = resourceGroup().location
+param location string = resourceGroup().location
 param runDateTime string = utcNow()
 param templateFileName string = '~iothub.bicep'
 @allowed(['F1','S1','S2','S3'])
@@ -23,16 +21,16 @@ param sku string = 'S1'
 var iotHubName  = '${orgPrefix}${appPrefix}hub${environmentCode}${appSuffix}'
 var iotStorageAccountName = '${orgPrefix}${appPrefix}hub${environmentCode}${appSuffix}store'
 var iotStorageContainerName = 'iothubuploads'
-var svcBusName = '${orgPrefix}${appPrefix}svcbus${environmentCode}${appSuffix}'
 
 // --------------------------------------------------------------------------------
-resource svcBusResource 'Microsoft.ServiceBus/namespaces@2021-11-01' existing = { name: svcBusName }
+//var svcBusName = '${orgPrefix}${appPrefix}svcbus${environmentCode}${appSuffix}'
+//resource svcBusResource 'Microsoft.ServiceBus/namespaces@2021-11-01' existing = { name: svcBusName }
 
 // --------------------------------------------------------------------------------
 // create a storage account for the Iot Hub to use
 resource iotStorageAccountResource 'Microsoft.Storage/storageAccounts@2021-04-01' = {
   name: iotStorageAccountName
-  location: regionName
+  location: location
   tags: {
     LastDeployed: runDateTime
     TemplateFile: templateFileName
@@ -59,7 +57,7 @@ var iotStorageAccountConnectionString = 'DefaultEndpointsProtocol=https;AccountN
 // create an IoT Hub and link it to the Storage Container
 resource iotHubResource 'Microsoft.Devices/IotHubs@2021-07-02' = {
   name: iotHubName
-  location: regionName
+  location: location
   tags: {
     LastDeployed: runDateTime
     TemplateFile: templateFileName
@@ -141,3 +139,7 @@ resource iotHubResource 'Microsoft.Devices/IotHubs@2021-07-02' = {
     enableDataResidency: false
   }
 }
+
+output iotHubName string = iotHubName
+output iotStorageAccountName string = iotStorageAccountName
+output iotStorageContainerName string = iotStorageContainerName

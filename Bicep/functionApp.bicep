@@ -11,20 +11,21 @@ param location string = resourceGroup().location
 param appInsightsLocation string = resourceGroup().location
 param runDateTime string = utcNow()
 param templateFileName string = '~functionApp.bicep'
+
 param functionAppSku string = 'Y1'
 param functionAppSkuFamily string = 'Y'
 param functionAppSkuTier string = 'Dynamic'
-param functionStorageAccountName string
 
-param functionName string = 'process'
 @allowed([ 'Standard_LRS', 'Standard_GRS', 'Standard_RAGRS' ])
 param storageAccountType string = 'Standard_LRS'
 
 // --------------------------------------------------------------------------------
-var functionAppName = toLower('${orgPrefix}-${appPrefix}-func-${environmentCode}${appSuffix}')
+var functionName = 'process'
+var functionAppName = toLower('${orgPrefix}-${appPrefix}-${functionName}-${environmentCode}${appSuffix}')
 var appServicePlanName = toLower('${functionAppName}-appsvc')
 var functionInsightsName = toLower('${functionAppName}-insights')
-var keyVaultName = '${orgPrefix}${appPrefix}keyvault${environmentCode}${appSuffix}'
+var functionStorageAccountName = toLower('${orgPrefix}${appPrefix}funcstore${environmentCode}${appSuffix}')
+var keyVaultName = '${orgPrefix}${appPrefix}vault${environmentCode}${appSuffix}'
 
 // --------------------------------------------------------------------------------
 // var iotHubName = '${orgPrefix}${appPrefix}hub${environmentCode}${appSuffix}'
@@ -39,7 +40,7 @@ var iotStorageKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName}
 
 // --------------------------------------------------------------------------------
 resource storageAccountResource 'Microsoft.Storage/storageAccounts@2021-08-01' = {
-  name: storageAccountName
+  name: functionStorageAccountName
   location: location
   tags: {
     LastDeployed: runDateTime

@@ -73,9 +73,6 @@ resource cosmosAccountResource 'Microsoft.DocumentDB/databaseAccounts@2022-05-15
       }
     }
     networkAclBypassResourceIds: []
-    diagnosticLogSettings: {
-      enableFullTextQuery: 'None'
-    }
     capacity: {
       totalThroughputLimit: 4000
     }

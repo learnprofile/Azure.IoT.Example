@@ -1,7 +1,5 @@
 // --------------------------------------------------------------------------------
 // This BICEP file will create a Stream Analytics Job 
-// To create the ARM template, run this command:
-//   az bicep build --file streaming.bicep --outfile streaming.json
 // --------------------------------------------------------------------------------
 
 param orgPrefix string = 'org'
@@ -9,15 +7,16 @@ param appPrefix string = 'app'
 @allowed(['dev','qa','stg','prod'])
 param environmentCode string = 'dev'
 param appSuffix string = '1'
-param regionName string = resourceGroup().location
+param location string = resourceGroup().location
 param runDateTime string = utcNow()
 param templateFileName string = '~streaming.bicep'
 param sku string = 'F1'
 
+param iotHubName string
+param svcBusName string
+param svcBusQueueName string
+
 // --------------------------------------------------------------------------------
-var svcBusQueueName = 'iotmsgs'
-var iotHubName = '${orgPrefix}${appPrefix}hub${environmentCode}${appSuffix}'
-var svcBusName = '${orgPrefix}${appPrefix}svcbus${environmentCode}${appSuffix}'
 var saJobName = '${orgPrefix}${appPrefix}stream${environmentCode}${appSuffix}'
 
 // --------------------------------------------------------------------------------
@@ -31,7 +30,7 @@ var svcBusAccessKey = '${listKeys(svcBusAccessKeyEndpoint, svcBusResource.apiVer
 // --------------------------------------------------------------------------------
 resource saJobResource 'Microsoft.StreamAnalytics/streamingjobs@2021-10-01-preview' = {
   name: saJobName
-  location: regionName
+  location: location
   tags: {
     LastDeployed: runDateTime
     TemplateFile: templateFileName
@@ -117,3 +116,5 @@ resource saJobResource 'Microsoft.StreamAnalytics/streamingjobs@2021-10-01-previ
     }  
   }
 }
+
+output saJobName string = saJobName

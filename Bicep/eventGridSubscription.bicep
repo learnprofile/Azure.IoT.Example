@@ -1,15 +1,12 @@
 // --------------------------------------------------------------------------------
 // This BICEP file will create a Azure Function
-// To create the ARM template, run this command:
-//   az bicep build --file eventGridSubscription.bicep --outfile eventGridSubscription.json
 // --------------------------------------------------------------------------------
-
 param orgPrefix string = 'org'
 param appPrefix string = 'app'
 @allowed(['dev','qa','stg','prod'])
 param environmentCode string = 'dev'
 param appSuffix string = '1'
-param regionName string = resourceGroup().location
+param location string = resourceGroup().location
 param runDateTime string = utcNow()
 param templateFileName string = '~eventGridSubscription.bicep'
 param sku string = ''
@@ -29,7 +26,7 @@ var svcBusQueueNameSpace = '${subscription().id}/resourceGroups/${resourceGroup(
 // --------------------------------------------------------------------------------
 resource eventGridSystemTopicResource 'Microsoft.EventGrid/systemTopics@2021-12-01' = {
   name: eventGridTopicName
-  location: regionName
+  location: location
   tags: {
     LastDeployed: runDateTime
     TemplateFile: templateFileName
@@ -69,3 +66,6 @@ resource systemTopics_fileuploadstopicdev_name_fileuploadsubscriptiondev 'Micros
     }
   }
 }
+
+output eventGridTopicName string = eventGridTopicName
+output eventGridSubscriptionName string = eventGridSubscriptionName
