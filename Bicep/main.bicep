@@ -16,7 +16,7 @@ param appSuffix string = '' // '-1'
 param functionAppSku string = 'Y1'
 param functionAppSkuFamily string = 'Y'
 param functionAppSkuTier string = 'Dynamic'
-param webSiteSku string = 'F1'
+param webSiteSku string = 'B1'
 param runDateTime string = utcNow()
 
 // --------------------------------------------------------------------------------
