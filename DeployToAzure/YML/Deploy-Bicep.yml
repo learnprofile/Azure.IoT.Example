@@ -22,19 +22,7 @@ jobs:
       displayName: 'Deploy ARM Templates'
       inputs:
         csmFile: 'DeployToAzure/Bicep/main.bicep'
-        #overrideParameters: '-environmentCode $(environmentCode) -location $(location) -orgPrefix $(orgPrefix) -appPrefix $(appPrefix) -appSuffix $(appSuffix) -functionAppSku $(functionAppSku) -functionAppSkuFamily $(functionAppSkuFamily) -functionAppSkuTier $(functionAppSkuTier) -keyVaultOwnerUserId1 $(keyVaultOwnerUserId1) -keyVaultOwnerUserId2 $(keyVaultOwnerUserId2) -runDateTime ${{parameters.runDateTime}}'
-        overrideParameters: 
-          environmentCode: $(environmentCode) 
-          location: $(location) 
-          orgPrefix: $(orgPrefix) 
-          appPrefix: $(appPrefix) 
-          appSuffix: $(appSuffix) 
-          functionAppSku: $(functionAppSku) 
-          functionAppSkuFamily: $(functionAppSkuFamily) 
-          functionAppSkuTier: $(functionAppSkuTier) 
-          keyVaultOwnerUserId1: $(keyVaultOwnerUserId1) 
-          keyVaultOwnerUserId2: $(keyVaultOwnerUserId2) 
-          runDateTime: ${{parameters.runDateTime}}'
+        overrideParameters: '-environmentCode $(environmentCode) -location $(location) -orgPrefix $(orgPrefix) -appPrefix $(appPrefix) -appSuffix $(appSuffix) -functionAppSku $(functionAppSku) -functionAppSkuFamily $(functionAppSkuFamily) -functionAppSkuTier $(functionAppSkuTier) -keyVaultOwnerUserId1 $(keyVaultOwnerUserId1) -keyVaultOwnerUserId2 $(keyVaultOwnerUserId2) -runDateTime ${{parameters.runDateTime}}'
         deploymentScope: 'Resource Group'
         azureResourceManagerConnection: '$(subscriptionName)'
         subscriptionId: '$(subscriptionId)'
