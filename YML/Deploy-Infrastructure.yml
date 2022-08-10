@@ -1,0 +1,53 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# Pipeline to deploy Azure Resources for All Environments for the IoT Demo Project
+# ------------------------------------------------------------------------------------------------------------------------
+# Create a variable group for each environment with these variables:
+#   environmentCode: 'dev/qa/prod'
+#   resourceGroupName: 'rg_resourceGroupName'
+#   subscriptionName: '<ServiceConnectionName / Subscription Name>'
+#   subscriptionId: '<subscriptionId>'
+#   location: 'eastus'
+#   orgPrefix: '<org - your initials>'
+#   appPrefix: 'iotdemo'
+#   appSuffix: ''
+#   storageSku: 'Standard_LRS'
+#   functionAppSku: 'Y1'
+#   functionAppSkuFamily: 'Y'
+#   functionAppSkuTier: 'Dynamic'
+#   webSiteSku: 'Y1'
+# ------------------------------------------------------------------------------------------------------------------------
+name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
+pool:
+  vmImage: ubuntu-latest
+
+# ------------------------------------------------------------------------------------------------------------------------
+#trigger: none # only fire this manually
+trigger:
+  paths:
+    include: 
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.bicep'
+
+# ----------------------------------------------------------------------------------------------------
+stages:
+- stage: DeployDEVResources
+  displayName: DEV Deploy Resources
+  jobs:
+  - template: Deploy-Bicep.yml
+    parameters:
+      variableGroupName: 'IoTDemo-Infra-Dev'
+      environmentUpper: 'DEV'
+      runDateTime: 'Pipeline-$(Build.BuildNumber)'
+
+# ----------------------------------------------------------------------------------------------------
+- stage: DeployQAResources
+  displayName: QA Deploy Resources
+  dependsOn: DeployDEVResources
+  condition: succeeded('DeployDEVResources')
+  jobs:
+  - template: Deploy-Bicep.yml
+    parameters:
+      variableGroupName: 'IoTDemo-Infra-QA'
+      environmentUpper: 'QA'
+      runDateTime: 'Pipeline-$(Build.BuildNumber)'

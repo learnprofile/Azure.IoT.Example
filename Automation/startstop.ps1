@@ -55,18 +55,18 @@ function EchoParameters {
 function GetResourceNames {
   if ($envName -ne $null -and $envName -eq 'dev') {
     write-host "  Controlling $($envName) Environment..." -ForegroundColor Yellow
-    Set-Variable -Name "rgName"       -value "rg_iotdev" -scope global
-    Set-Variable -Name "streamName"   -value "lciiotstreamdev1" -scope global
-    Set-Variable -Name "websiteName"  -value "lciiotdashboarddev1" -scope global
-    Set-Variable -Name "functionName" -value "lciiotprocessdev1" -scope global
+    Set-Variable -Name "rgName"       -value "rg_iotdemo_dev" -scope global
+    Set-Variable -Name "streamName"   -value "lll-iotdemo-stream-dev" -scope global
+    Set-Variable -Name "websiteName"  -value "lll-iotdemo-dashboard-dev" -scope global
+    Set-Variable -Name "functionName" -value "lll-iotdemo-process-dev" -scope global
   }
   if ($envName -ne $null -and $envName -eq 'qa')
   {
     write-host "  Controlling $($envName) Environment..." -ForegroundColor Yellow
-    Set-Variable -Name "rgName"       -value "rg_iotqa" -scope global
-    Set-Variable -Name "streamName"   -value "lciiotstreamqa1" -scope global
-    Set-Variable -Name "websiteName"  -value "lciiotdashboardqa1" -scope global
-    Set-Variable -Name "functionName" -value "lciiotprocessqa1" -scope global
+    Set-Variable -Name "rgName"       -value "rg_iotdemo_qa" -scope global
+    Set-Variable -Name "streamName"   -value "lll-iotdemo-stream-qa" -scope global
+    Set-Variable -Name "websiteName"  -value "lll-iotdemo-dashboard-dev" -scope global
+    Set-Variable -Name "functionName" -value "lll-iotdemo-process-dev" -scope global
   }
   if ($rgName -eq '') {
     write-host "  Invalid environment supplied!!" -ForegroundColor Red

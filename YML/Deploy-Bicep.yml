@@ -1,0 +1,34 @@
+# ----------------------------------------------------------------------------------------------------
+# Pipeline to deploy all Azure Resources for one environment for the Azure Function Example Project
+# ----------------------------------------------------------------------------------------------------
+parameters:
+  variableGroupName: 'myVariableGroup'
+  environmentUpper: 'DEV'
+  runDateTime: '12-31-2020 23:59:59'
+
+# ----------------------------------------------------------------------------------------------------
+jobs:
+  - deployment: DeployEnvironment
+    displayName: 'Initialize Deploy'
+    environment: $(environmentUpper)
+  - job: Deploy_Job
+    displayName: Deploy Environment
+    variables:
+      - group: ${{ parameters.variableGroupName }}
+    steps:
+    #- script: az bicep build --file DeployToAzure/main.bicep --outfile DeployToAzure/main.json
+    #  displayName: 'Compile main Bicep file to ARM'
+    - task: AzureResourceManagerTemplateDeployment@3
+      displayName: 'Deploy ARM Templates'
+      inputs:
+        deploymentScope: 'Resource Group'
+        azureResourceManagerConnection: '$(subscriptionName)'
+        subscriptionId: '$(subscriptionId)'
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: '$(resourceGroupName)'
+        location: '$(location)'
+        templateLocation: 'Linked artifact'
+        csmFile: 'DeployToAzure/main.bicep'
+        overrideParameters: '-environmentCode $(environmentCode) -location $(location) -orgPrefix $(orgPrefix) -appPrefix $(appPrefix) -appSuffix $(appSuffix) -storageSku $(storageSku) -functionAppSku $(functionAppSku) -functionAppSkuFamily $(functionAppSkuFamily) -functionAppSkuTier $(functionAppSkuTier) -runDateTime ${{parameters.runDateTime}}'
+        deploymentMode: 'Incremental'
+        continueOnError: ignoreError
