@@ -9,7 +9,7 @@
 # ------------------------------------------------------------------------------------------------------------------------
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'windows-2022'
 
 # ------------------------------------------------------------------------------------------------------------------------
 #trigger: none # fire this manually for now
@@ -50,14 +50,20 @@ stages:
         publishWebProjects: false
         zipAfterPublish: true
         projects: '**/*.csproj'
-        arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/code/'
+        arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration Release
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Save artifacts'
+    - task: ArchiveFiles@2
+      displayName: 'Archive files'
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/code/'
-        ArtifactName: 'Code'
-        publishLocation: Container                        
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)/publish_output'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
+
+    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      displayName: 'Publish Artifacts'
+      artifact: drop
 
 # ------------------------------------------------------------------------------------------------------------------------
 - stage: DeployDEV
@@ -75,12 +81,12 @@ stages:
         deploy:
           steps:
           - task: AzureFunctionApp@1
-            displayName: 'Azure functions app deploy'
+            displayName: 'Azure Function App Deploy'
             inputs:
               azureSubscription: '$(subscriptionNameDev)'
-              appType: functionAppLinux
+              appType: functionApp
               appName: $(functionAppNameDev)
-              package: $(Pipeline.Workspace)/Code/*.zip
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
 
 # ------------------------------------------------------------------------------------------------------------------------
 - stage: DeployQA
@@ -98,9 +104,9 @@ stages:
         deploy:
           steps:
           - task: AzureFunctionApp@1
-            displayName: 'Azure functions app deploy'
+            displayName: 'Azure Function App Deploy'
             inputs:
               azureSubscription: '$(subscriptionNameQA)'
-              appType: functionAppLinux
+              appType: functionApp
               appName: $(functionAppNameQA)
-              package: $(Pipeline.Workspace)/Code/*.zip
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
