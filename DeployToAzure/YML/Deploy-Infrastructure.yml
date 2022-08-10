@@ -15,6 +15,9 @@
 #   functionAppSkuFamily: 'Y'
 #   functionAppSkuTier: 'Dynamic'
 #   webSiteSku: 'B1'
+#   keyVaultOwnerUserId1: '<guid>' // Future: email address
+#   keyVaultOwnerUserId2: '<guid>' // Future: email address
+
 # ------------------------------------------------------------------------------------------------------------------------
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 pool:

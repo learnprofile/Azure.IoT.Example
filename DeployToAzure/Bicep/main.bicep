@@ -4,9 +4,9 @@
 // --------------------------------------------------------------------------------
 // To deploy this Bicep manually:
 // 	 az login
-//   az account set --subscription d1ced742-2c89-420b-a12a-6d9dc6d48c43
-//   az deployment group create -n main-deploy-20220809T170000Z --resource-group rg_iotdemo_dev --template-file 'main.bicep' --parameters environmentCode=dev orgPrefix=lll appPrefix=iotdemo
-//   az deployment group create -n main-deploy-20220809T170000Z --resource-group rg_iotdemo_qa --template-file 'main.bicep' --parameters environmentCode=qa orgPrefix=lll appPrefix=iotdemo
+//   az account set --subscription <subscriptionId>
+//   az deployment group create -n main-deploy-20220809T170000Z --resource-group rg_iotdemo_dev --template-file 'main.bicep' --parameters environmentCode=dev orgPrefix=xxx appPrefix=iotdemo
+//   az deployment group create -n main-deploy-20220809T170000Z --resource-group rg_iotdemo_qa --template-file 'main.bicep' --parameters environmentCode=qa orgPrefix=xxx appPrefix=iotdemo
 // --------------------------------------------------------------------------------
 param environmentCode string = 'dev'
 param location string = resourceGroup().location
@@ -17,6 +17,8 @@ param functionAppSku string = 'Y1'
 param functionAppSkuFamily string = 'Y'
 param functionAppSkuTier string = 'Dynamic'
 param webSiteSku string = 'B1'
+param keyVaultOwnerUserId1 string
+param keyVaultOwnerUserId2 string
 param runDateTime string = utcNow()
 
 // --------------------------------------------------------------------------------
@@ -160,11 +162,12 @@ module webSiteModule 'webSite.bicep' = {
     runDateTime: runDateTime
   }
 }
-// Create a powershell step to put Owner Object Ids into variables:
-var owner1UserObjectId = 'd4aaf634-e777-4307-bb6e-7bf2305d166e' // Lyle's AD Guid
-var owner2UserObjectId = '209019b5-167b-45cd-ab9c-f987fa262040' // Chris's AD Guid
+
+var owner1UserObjectId = keyVaultOwnerUserId1 // Currently pass in the AD Guid
+var owner2UserObjectId = keyVaultOwnerUserId2 // Currently pass in the AD Guid
+// Future: Create a powershell step to retrieve Owner Object Guids from an email address:
 //   > Connect-AzureAD
-//   > $owner1UserObjectId = (Get-AzureAdUser -ObjectId 'lyleluppes@microsoft.com').ObjectId
+//   > $owner1UserObjectId = (Get-AzureAdUser -ObjectId 'someuser@microsoft.com').ObjectId
 
 module keyVaultModule 'keyVault.bicep' = {
   name: 'keyvault${deploymentSuffix}'
@@ -174,7 +177,7 @@ module keyVaultModule 'keyVault.bicep' = {
     functionAppPrincipalId: functionModule.outputs.functionAppPrincipalId
     owner1UserObjectId: owner1UserObjectId
     owner2UserObjectId: owner2UserObjectId
-
+    
     templateFileName: '~keyVault.bicep'
     orgPrefix: orgPrefix
     appPrefix: appPrefix

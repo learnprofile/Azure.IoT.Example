@@ -22,7 +22,6 @@ param iotHubName string
 var dpsName  = '${orgPrefix}-${appPrefix}-dps-${environmentCode}${appSuffix}'
 //var certName = '${orgPrefix}-device-root-cert'
 
-//var iotHubName = '${orgPrefix}${appPrefix}hub${environmentCode}${appSuffix}'
 resource iotHubResource 'Microsoft.Devices/IotHubs@2021-07-02' existing = { name: iotHubName }
 var iotHubConnectionString = 'HostName=${iotHubResource.name}.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=${listKeys(iotHubResource.id, iotHubResource.apiVersion).value[0].primaryKey}'
 
@@ -61,7 +60,7 @@ resource dpsResource 'Microsoft.Devices/provisioningServices@2022-02-05' = {
 //   name: certName
 //   parent: dpsResource
 //   properties: {
-//     certificate: 'MIICDjCCAXcCFGr1kIjSec4nj094+PFzeJxB96CxMA0GCSqGSIb3DQEBCwUAMEYxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJNTjEaMBgGA1UECgwRTHVwcGVzIENvbnN1bHRpbmcxDjAMBgNVBAMMBWxjaWNhMB4XDTIyMDYxNjE4NTA0M1oXDTIzMDYxNjE4NTA0M1owRjELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAk1OMRowGAYDVQQKDBFMdXBwZXMgQ29uc3VsdGluZzEOMAwGA1UEAwwFbGNpY2EwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAONFfIBu/uoLfGfxHnnlJtNqeE1gEWyWHFF9bfHDAir3gy9jttNoiZxhwlNkQxgGKai+dVk9VXlYq3S/UgJJEWYrbQhmaJDAoSDzf6g31pyR3J7z3EPx0QVcxwKMZPy91IKizGupuk1S/r3Cbi/BV/p20X71UHzLHGbiLqFui0wbAgMBAAEwDQYJKoZIhvcNAQELBQADgYEA0OHyKqt+Tw7ZjI3RwZ2MI3pRwNHZ7f3XzcfpQFIGX7zWAZItidWiTTHNSBjzVkXFQiPQCsRaY5YFY9jDPLVDytgA1dtmztwgBIBJloIeZuQ4iJYU7dzxvVg++8ybDYnyzckVS9sNKueF1VOA8AExDU+gawmh/pbe9r8+49/4A+Q='
+//     certificate: 'MIICDjCCAXcCFGr1kIjSec...base64stuff...='
 //     isVerified: true
 //   }
 // }
