@@ -9,7 +9,7 @@
 # ------------------------------------------------------------------------------------------------------------------------
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 pool:
-  vmImage: 'windows-2022'
+  vmImage: 'windows-latest'
 
 # ------------------------------------------------------------------------------------------------------------------------
 #trigger: none # fire this manually for now
@@ -36,8 +36,6 @@ stages:
   jobs:
   - job: Build
     displayName: Build
-    pool:
-      vmImage: $(vmImage)
 
     steps:
     - task: DotNetCoreCLI@2
