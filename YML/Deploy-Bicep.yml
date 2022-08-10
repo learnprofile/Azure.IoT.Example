@@ -21,6 +21,8 @@ jobs:
     - task: AzureResourceManagerTemplateDeployment@3
       displayName: 'Deploy ARM Templates'
       inputs:
+        csmFile: 'Bicep/main.bicep'
+        overrideParameters: '-environmentCode $(environmentCode) -location $(location) -orgPrefix $(orgPrefix) -appPrefix $(appPrefix) -appSuffix $(appSuffix) -functionAppSku $(functionAppSku) -functionAppSkuFamily $(functionAppSkuFamily) -functionAppSkuTier $(functionAppSkuTier) -runDateTime ${{parameters.runDateTime}}'
         deploymentScope: 'Resource Group'
         azureResourceManagerConnection: '$(subscriptionName)'
         subscriptionId: '$(subscriptionId)'
@@ -28,7 +30,5 @@ jobs:
         resourceGroupName: '$(resourceGroupName)'
         location: '$(location)'
         templateLocation: 'Linked artifact'
-        csmFile: 'Bicep/main.bicep'
-        overrideParameters: '-environmentCode $(environmentCode) -location $(location) -orgPrefix $(orgPrefix) -appPrefix $(appPrefix) -appSuffix $(appSuffix) -storageSku $(storageSku) -functionAppSku $(functionAppSku) -functionAppSkuFamily $(functionAppSkuFamily) -functionAppSkuTier $(functionAppSkuTier) -runDateTime ${{parameters.runDateTime}}'
         deploymentMode: 'Incremental'
         continueOnError: ignoreError
