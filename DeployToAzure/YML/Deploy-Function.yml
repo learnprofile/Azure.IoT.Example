@@ -25,7 +25,8 @@ trigger:
 
 # ------------------------------------------------------------------------------------------------------------------------
 variables:
-  - group: 'IoTDemo-Deploy-FunctionApp'
+  workingDirectory: '$(System.DefaultWorkingDirectory)/FunctionApp/IoT.Processor'
+  group: 'IoTDemo-Deploy-FunctionApp'
 
 # ------------------------------------------------------------------------------------------------------------------------
 stages:
@@ -34,22 +35,15 @@ stages:
   jobs:
   - job: Build
     displayName: Build
+    pool:
+      vmImage: $(vmImageName)
 
     steps:
     - task: DotNetCoreCLI@2
       displayName: 'dotnet build'
       inputs:
         command: build
-        projects: '**/*.csproj'
-        arguments: '-- configuration Release'
-
-    - task: DotNetCoreCLI@2
-      displayName: 'dotnet publish'
-      inputs:
-        command: publish
-        publishWebProjects: false
-        zipAfterPublish: true
-        projects: '**/*.csproj'
+        projects: $(workingDirectory)/*.csproj
         arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration Release
 
     - task: ArchiveFiles@2
@@ -62,8 +56,8 @@ stages:
         replaceExistingArchive: true
 
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-      displayName: 'Publish Artifacts'
       artifact: drop
+
 
 # ------------------------------------------------------------------------------------------------------------------------
 - stage: DeployDEV
