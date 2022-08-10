@@ -21,7 +21,7 @@ jobs:
     - task: AzureResourceManagerTemplateDeployment@3
       displayName: 'Deploy ARM Templates'
       inputs:
-        csmFile: 'Bicep/main.bicep'
+        csmFile: 'DeployToAzure/Bicep/main.bicep'
         overrideParameters: '-environmentCode $(environmentCode) -location $(location) -orgPrefix $(orgPrefix) -appPrefix $(appPrefix) -appSuffix $(appSuffix) -functionAppSku $(functionAppSku) -functionAppSkuFamily $(functionAppSkuFamily) -functionAppSkuTier $(functionAppSkuTier) -runDateTime ${{parameters.runDateTime}}'
         deploymentScope: 'Resource Group'
         azureResourceManagerConnection: '$(subscriptionName)'
