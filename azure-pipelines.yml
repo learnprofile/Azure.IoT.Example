@@ -14,7 +14,7 @@ variables:
   functionAppName: 'lll-iotdemo-process-dev'
 
   # Agent VM image name
-  vmImageName: 'windows-2019'
+  vmImageName: 'windows-2022'
 
   # Working Directory
   workingDirectory: '$(System.DefaultWorkingDirectory)/FunctionApp/IoT.Processor'
