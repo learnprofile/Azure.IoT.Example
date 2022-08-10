@@ -11,7 +11,7 @@ param location string = resourceGroup().location
 param appInsightsLocation string = resourceGroup().location
 param runDateTime string = utcNow()
 param templateFileName string = '~website.bicep'
-@allowed(['F1','S1','S2','S3'])
+@allowed(['F1','B1','B2','S1','S2','S3'])
 param sku string = 'F1'
 
 param webAppName string = 'dashboard'
