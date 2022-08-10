@@ -1,0 +1,223 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# Build for IoT Simulator, compiles for both Windows (x64) and Linux
+# ------------------------------------------------------------------------------------------------------------------------
+# For YAML formatting help go to: http://www.yamllint.com/
+# ------------------------------------------------------------------------------------------------------------------------
+# Note: this job needs VariableGroup "CodeSigning" to work (to setup: go to Edit Triggers, then add via Variables tab...)
+# This Variable Group provides these values:
+#   $(SubscriptionName) = Your Subscription Name <guid>
+#   $(KeyVaultUrl) = https://<vaultname>.vault.azure.net/
+#   $(CertName)  = <certName>
+#   $(SigningAppRegAppId) = <App Id guid>
+#   $(SigningAppRegClientSecret) = <secret>
+#   $(ActiveDirectoryTenantId) = <AD Tenant guid>
+#   $(TimestampUrl) =?= http://timestamp.digicert.com
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
+
+variables:
+  - name: solution
+    value: '**/*.sln'
+  - name: buildPlatform
+    value: 'Any CPU'
+  - name: exeName
+    value: IoT.Simulator
+  - name: buildConfiguration
+    value: 'Release'
+  - name: storageAccountName
+    value: 'downloads'
+  - name: storageFolderDev
+    value: 'downloadsdev'
+  - name: storageFolderQA
+    value: 'downloadsqa'
+  - group: CodeSigning
+
+stages:
+- stage: BuildProgram
+  displayName: 'Build Program'
+  jobs:
+    - job: Build
+      steps:
+      - task: NuGetToolInstaller@1
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Install AzureSignTool'
+        inputs:
+          command: custom
+          custom: tool
+          arguments: 'install --global azuresigntool'
+        continueOnError: true
+   
+      - task: NuGetCommand@2
+        inputs:
+          restoreSolution: '$(solution)'
+
+      - task: VSBuild@1
+        displayName: 'Build Program'
+        inputs:
+          solution: '$(solution)'
+          platform: '$(buildPlatform)'
+          configuration: '$(buildConfiguration)'
+
+      - task: VSTest@2
+        displayName: 'Test Program'
+        inputs:
+          platform: '$(buildPlatform)'
+          configuration: '$(buildConfiguration)'
+
+      - task: DotNetCoreCLI@2
+        displayName: Create win-x64 package
+        inputs:
+          command: publish
+          projects: '$(solution)'
+          packDirectory: 
+          publishWebProjects: false
+          arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r win-x64 --output $(build.artifactstagingdirectory)/packages'
+          zipAfterPublish: false
+
+      - task: PowerShell@2
+        displayName: 'Show Directory List'
+        inputs:
+          targetType: 'inline'
+          script: |
+            cd $(build.artifactstagingdirectory)
+            Get-ChildItem -Recurse
+        continueOnError: true
+
+      - task: PowerShell@2
+        displayName: 'Sign win-x64 application'
+        inputs:
+          targetType: 'inline'
+          script: |
+            cd $(build.artifactstagingdirectory)/packages
+            azuresigntool sign s/$(exeName).exe -kvu $(KeyVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
+        continueOnError: true
+
+      - task: PowerShell@2
+        displayName: Move win-x64 package to Deploy Folder
+        inputs:
+          targetType: 'inline'
+          script: |
+            cd $(build.artifactstagingdirectory)/packages
+            md Deploy
+            cd Deploy
+            md win-x64
+            cd ..
+            move s/$(exeName).exe $(build.artifactstagingdirectory)/packages/Deploy/win-x64/
+          errorActionPreference: 'continue'
+          failOnStderr: false
+
+      - task: DotNetCoreCLI@2
+        displayName: Create Linux package
+        inputs:
+          command: publish
+          projects: '$(solution)'
+          publishWebProjects: false
+          arguments: '--configuration $(BuildConfiguration) /p:PublishSingleFile=true --self-contained -f net6.0 -r linux-x64 --output $(build.artifactstagingdirectory)/packages'
+          zipAfterPublish: false
+
+      - task: PowerShell@2
+        displayName: Move Linux package to Deploy Folder
+        inputs:
+          targetType: 'inline'
+          script: |
+            cd $(build.artifactstagingdirectory)/packages
+            cd Deploy
+            md Linux
+            cd ..
+            move s/$(exeName) $(build.artifactstagingdirectory)/packages/Deploy/Linux/
+          errorActionPreference: 'continue'
+          failOnStderr: false
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Deployed Artifacts'
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/packages/Deploy'
+
+# --------------------------------------------------------------------------------
+- stage: DeployDEV
+  displayName: DEV Deploy Output
+  jobs:
+    - deployment: DeployFiles
+      displayName: 'Download Artifacts'
+      environment: 'DEV'
+    - job: AzureFileCopy
+      displayName: 'Copy Files to Azure Storage'
+      steps:
+      - task: DownloadBuildArtifacts@0
+        displayName: 'Download Artifacts'
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          downloadPath: '$(System.ArtifactsDirectory)'
+          artifactName: 'drop'
+
+      - task: AzureFileCopy@4
+        displayName: 'AzureFileCopy: win-x64'
+        inputs:
+          SourcePath: '$(System.ArtifactsDirectory)/drop/win-x64'
+          azureSubscription: $(SubscriptionName)
+          Destination: AzureBlob
+          storage: $(storageAccountName)
+          ContainerName: $(storageFolderDev)
+          BlobPrefix: IoT-Simulator/
+          sasTokenTimeOutInMinutes: 240
+
+      - task: AzureFileCopy@4
+        displayName: 'AzureFileCopy: Linux'
+        inputs:
+          SourcePath: '$(System.ArtifactsDirectory)/drop/Linux'
+          azureSubscription: $(SubscriptionName)
+          Destination: AzureBlob
+          storage: $(storageAccountName)
+          ContainerName: $(storageFolderDev)
+          BlobPrefix: IoT-Simulator/
+          sasTokenTimeOutInMinutes: 240
+
+# --------------------------------------------------------------------------------
+- stage: DeployProd
+  displayName: PROD Deploy Output
+  dependsOn: DeployDEV
+  condition: succeeded('DeployDEV')
+  jobs:
+    - deployment: DeployFiles
+      displayName: 'Download Artifacts'
+      environment: 'PROD'
+    - job: AzureFileCopy
+      displayName: 'Copy Files to Azure Storage'
+      steps:
+      - task: DownloadBuildArtifacts@0
+        displayName: 'Download Artifacts'
+        inputs:
+          buildType: 'current'
+          downloadType: 'single'
+          downloadPath: '$(System.ArtifactsDirectory)'
+          artifactName: 'drop'
+
+      - task: AzureFileCopy@4
+        displayName: 'AzureFileCopy: win-x64'
+        inputs:
+          SourcePath: '$(System.ArtifactsDirectory)/drop/win-x64'
+          azureSubscription: $(SubscriptionName)
+          Destination: AzureBlob
+          storage: $(storageAccountName)
+          ContainerName: $(storageFolderProd)
+          BlobPrefix: IoT-Simulator/
+          sasTokenTimeOutInMinutes: 240
+
+      - task: AzureFileCopy@4
+        displayName: 'AzureFileCopy: Linux'
+        inputs:
+          SourcePath: '$(System.ArtifactsDirectory)/drop/Linux'
+          azureSubscription: $(SubscriptionName)
+          Destination: AzureBlob
+          storage: $(storageAccountName)
+          ContainerName: $(storageFolderProd)
+          BlobPrefix: IoT-Simulator/
+          sasTokenTimeOutInMinutes: 240
