@@ -14,7 +14,7 @@
 #   functionAppSku: 'Y1'
 #   functionAppSkuFamily: 'Y'
 #   functionAppSkuTier: 'Dynamic'
-#   webSiteSku: 'Y1'
+#   webSiteSku: 'B1'
 # ------------------------------------------------------------------------------------------------------------------------
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 pool:
