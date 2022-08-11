@@ -18,6 +18,8 @@ trigger:
     include: 
       - main
   paths:
+    include:
+      - FunctionApp
     exclude: 
       - '**/*.yml'
       - '**/*.yaml'

@@ -12,7 +12,12 @@
 #   $(TimestampUrl) =?= http://timestamp.digicert.com
 
 trigger:
-- master
+  branches:
+    include: 
+      - main
+  paths:
+    include:
+      - Simulator
 
 pool:
   vmImage: 'windows-latest'

@@ -20,6 +20,8 @@ trigger:
     include: 
       - main
   paths:
+    include:
+      - Dashboard
     exclude: 
       - '**/*.yml'
       - '**/*.yaml'
