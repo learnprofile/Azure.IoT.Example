@@ -97,7 +97,7 @@ stages:
           targetType: 'inline'
           script: |
             cd $(build.artifactstagingdirectory)/packages
-            azuresigntool sign s/$(exeName).exe -kvu $(KeyVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
+            azuresigntool sign Simulator/$(exeName).exe -kvu $(KeyVaultUrl) -kvi $(SigningAppRegAppId) -kvs $(SigningAppRegClientSecret) -kvt $(ActiveDirectoryTenantId) -kvc $(CertName) -tr $(TimestampUrl) -v
         continueOnError: true
 
       - task: PowerShell@2
