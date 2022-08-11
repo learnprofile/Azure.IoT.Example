@@ -9,7 +9,14 @@
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 		<!--<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>-->
 	</PropertyGroup>
-
+	
+	<PropertyGroup>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+	</PropertyGroup>
+	<PropertyGroup>
+		<EnablePackageValidation>true</EnablePackageValidation>
+	</PropertyGroup>
+	
 	<ItemGroup>
 		<PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2" />
 		<PackageReference Include="Azure.Identity" Version="1.6.1" />
@@ -35,8 +42,4 @@
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="Sotsera.Blazor.Toaster" Version="3.0.0" />
 	</ItemGroup>
-
-	<PropertyGroup>
-		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
-	</PropertyGroup>
 </Project>

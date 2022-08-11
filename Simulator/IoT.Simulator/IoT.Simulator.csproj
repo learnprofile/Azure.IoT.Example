@@ -12,8 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="config.json" />
-    <None Remove="testsymm1.pfx" />
+    <None Remove="0ne007019C9.pfx" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,7 +20,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="favicon.ico" />
-    <Resource Include="testsymm1.pfx" />
   </ItemGroup>
 
   <ItemGroup>
