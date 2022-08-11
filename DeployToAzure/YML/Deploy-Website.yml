@@ -1,6 +1,8 @@
 # ------------------------------------------------------------------------------------------------------------------------
 # Build for IoT Dashboard WebSite for the IoT Demo Project
 # ------------------------------------------------------------------------------------------------------------------------
+# Note: this needs the 'Assembly Info' (by Bleddyn Richards) module from the DevOps Marketplace installed in order to run.
+# ------------------------------------------------------------------------------------------------------------------------
 # Create a variable group for each environment with these variables:
 #   subscriptionNameDev: '<ServiceConnectionName / Subscription Name>'
 #   functionAppNameDev: 'lll-iotdemo-dashboard-dev'
@@ -141,6 +143,54 @@ stages:
               azureSubscription: '$(subscriptionNameDev)'
               appType: webAppLinux
               WebAppName: $(webAppNameDev)
+              Package: "$(Build.ArtifactStagingDirectory)/../drop/$(projectName).zip"
+              enableCustomDeployment: true
+              deploymentMethod: zipDeployment
+
+# ------------------------------------------------------------------------------------------------------------------------
+- stage: DeployQA
+  displayName: QA Deploy stage
+  dependsOn: DeployDEV
+  condition: succeeded()
+
+  jobs:
+  - deployment: DeployQA
+    displayName: Deploy QA
+    environment: 'QA'
+
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+
+          - task: DownloadBuildArtifacts@0
+            displayName: 'Download Artifacts'
+            inputs:
+              PathtoDownload: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: 'drop'
+              downloadLocation: 'Container'
+
+          - powershell: |
+              Write-Host "Show all folder content"
+              Get-ChildItem -Path $(Build.ArtifactStagingDirectory)\..\*.* -Recurse -Force
+            errorActionPreference: continue
+            displayName: 'List Working Folder Contents'
+            continueOnError: true
+
+          #- script: |
+          #    echo 'Build.ArtifactStagingDirectory: $(Build.ArtifactStagingDirectory)'
+          #    echo 'System.ArtifactsDirectory: $(System.ArtifactsDirectory)'
+          #    echo 'System.DefaultWorkingDirectory: $(System.DefaultWorkingDirectory)'
+          #  displayName: 'Show Build Folder Paths'
+          #  continueOnError: true
+
+          - task: AzureRmWebAppDeployment@4
+            displayName: 'Publish App to Azure'
+            inputs:
+              ConnectionType: AzureRM
+              azureSubscription: '$(subscriptionNameQA)'
+              appType: webAppLinux
+              WebAppName: $(webAppNameQA)
               Package: "$(Build.ArtifactStagingDirectory)/../drop/$(projectName).zip"
               enableCustomDeployment: true
               deploymentMethod: zipDeployment
