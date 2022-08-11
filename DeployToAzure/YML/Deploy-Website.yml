@@ -26,11 +26,16 @@ trigger:
 # ------------------------------------------------------------------------------------------------------------------------
 variables:
   - group: 'IoTDemo-Deploy-WebSite'
-  - projectName: 'IoT.Dashboard'
-  - solution: '**/*.sln'
-  - buildPlatform: 'Any CPU'
-  - buildConfiguration: 'Release'
-  - appVersion: $(Build.BuildNumber)
+  - name: projectName
+    value: 'IoT.Dashboard'
+  - name: solution
+    value: '**/*.sln'
+  - name: buildPlatform
+    value: 'Any CPU'
+  - name: buildConfiguration
+    value: 'Release'
+  - name: appVersion
+    value: $(Build.BuildNumber)
 
 stages:
 - stage: BuildProgram
