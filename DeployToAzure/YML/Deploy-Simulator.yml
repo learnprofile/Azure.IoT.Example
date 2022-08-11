@@ -15,13 +15,13 @@ trigger:
 - master
 
 pool:
-  vmImage: 'windows-2022'
+  vmImage: 'windows-latest'
 
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 
 variables:
   - name: solution
-    value: '**/*.sln'
+    value: 'Simulator/*.sln'
   - name: buildPlatform
     value: 'Any CPU'
   - name: exeName
