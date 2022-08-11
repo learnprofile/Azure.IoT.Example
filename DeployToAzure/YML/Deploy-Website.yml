@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------------------------------------------------
 # Build for IoT Dashboard WebSite for the IoT Demo Project
 # ------------------------------------------------------------------------------------------------------------------------
-# Note: this needs the 'Assembly Info' (by Bleddyn Richards) module from the DevOps Marketplace installed in order to run.
+# Note: this build needs the 'Assembly Info' (by Bleddyn Richards) module from the DevOps Marketplace installed in order to run.
 # ------------------------------------------------------------------------------------------------------------------------
 # Create a variable group for each environment with these variables:
 #   subscriptionNameDev: '<ServiceConnectionName / Subscription Name>'
