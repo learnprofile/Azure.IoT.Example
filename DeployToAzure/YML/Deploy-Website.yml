@@ -31,7 +31,7 @@ variables:
   - name: projectName
     value: 'IoT.Dashboard'
   - name: solution
-    value: '**/*.sln'
+    value: 'Dashboard/*.sln'
   - name: buildPlatform
     value: 'Any CPU'
   - name: buildConfiguration
