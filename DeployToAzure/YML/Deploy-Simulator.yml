@@ -1,8 +1,6 @@
 # ------------------------------------------------------------------------------------------------------------------------
 # Build for IoT Simulator, compiles for both Windows (x64) and Linux
 # ------------------------------------------------------------------------------------------------------------------------
-# For YAML formatting help go to: http://www.yamllint.com/
-# ------------------------------------------------------------------------------------------------------------------------
 # Note: this job needs VariableGroup "CodeSigning" to work (to setup: go to Edit Triggers, then add via Variables tab...)
 # This Variable Group provides these values:
 #   $(SubscriptionName) = Your Subscription Name <guid>
@@ -17,7 +15,7 @@ trigger:
 - master
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'windows-2022'
 
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 
