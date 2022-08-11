@@ -30,8 +30,6 @@ variables:
     value: IoT.Simulator
   - name: buildConfiguration
     value: 'Release'
-  - name: storageAccountName
-    value: 'downloads'
   - name: storageFolderDev
     value: 'downloadsdev'
   - name: storageFolderQA
