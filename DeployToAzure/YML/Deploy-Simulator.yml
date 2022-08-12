@@ -1,18 +1,20 @@
 # ------------------------------------------------------------------------------------------------------------------------
-# Build for IoT Simulator, compiles for both Windows (x64) and Linux
+# Pipeline to build IoT Simulator; compiles for both Windows (x64) and Linux; copies EXE to storage for downloading ease
 # ------------------------------------------------------------------------------------------------------------------------
-# Note: In order for AzFileCopy to work, you need to find the account that drives the pipeline, then add that to the 
-#   storage account role -> "Storage Blob Data Owner"
+# Note 1: In order to sign the code, this job needs the VariableGroup "CodeSigning" to work 
+#   The "CodeSigning" Variable Group should have these values:
+#     SubscriptionName: <ServiceConnectionName -> SubscriptionName -> for AzFileCopy>
+#     KeyVaultUrl: https://<yourCertVaultName>.vault.azure.net/
+#     CertName: <Signing Cert Name>
+#     SigningAppRegAppId: <App Id that can read the vault>
+#     SigningAppRegClientSecret: <secret>
+#     ActiveDirectoryTenantId: <AD Tenant for the App Id>
+#     TimestampUrl: http://timestamp.digicert.com
 # ------------------------------------------------------------------------------------------------------------------------
-# Note: this job needs VariableGroup "CodeSigning" to work (to setup: go to Edit Triggers, then add via Variables tab...)
-# This Variable Group provides these values:
-#   $(SubscriptionName) = Your Subscription Name <guid>
-#   $(KeyVaultUrl) = https://<vaultname>.vault.azure.net/
-#   $(CertName)  = <certName>
-#   $(SigningAppRegAppId) = <App Id guid>
-#   $(SigningAppRegClientSecret) = <secret>
-#   $(ActiveDirectoryTenantId) = <AD Tenant guid>
-#   $(TimestampUrl) =?= http://timestamp.digicert.com
+# Note 2: To add variable group to Pipeline: go to Edit -> Edit Triggers to open detail editor -> add via Variables tab
+# ------------------------------------------------------------------------------------------------------------------------
+# Note 3: In order for AzFileCopy to work, you need to find the account that runs this pipeline, then add account
+#   to the storage account role "Storage Blob Data Owner"
 # ------------------------------------------------------------------------------------------------------------------------
 
 trigger:
@@ -37,10 +39,12 @@ variables:
     value: IoT.Simulator
   - name: buildConfiguration
     value: 'Release'
+
   - name: storageFolderDev
     value: 'downloadsdev'
   - name: storageFolderQA
     value: 'downloadsqa'
+
   - group: CodeSigning
 
 stages:
@@ -186,14 +190,14 @@ stages:
           sasTokenTimeOutInMinutes: 240
 
 # --------------------------------------------------------------------------------
-- stage: DeployProd
-  displayName: PROD Deploy Output
+- stage: DeployQA
+  displayName: QA Deploy Output
   dependsOn: DeployDEV
   condition: succeeded('DeployDEV')
   jobs:
     - deployment: DeployFiles
       displayName: 'Download Artifacts'
-      environment: 'PROD'
+      environment: 'QA'
     - job: AzureFileCopy
       displayName: 'Copy Files to Azure Storage'
       steps:
@@ -212,7 +216,7 @@ stages:
           azureSubscription: $(SubscriptionName)
           Destination: AzureBlob
           storage: $(storageAccountName)
-          ContainerName: $(storageFolderProd)
+          ContainerName: $(storageFolderQA)
           BlobPrefix: IoT-Simulator/
           sasTokenTimeOutInMinutes: 240
 
@@ -223,6 +227,6 @@ stages:
           azureSubscription: $(SubscriptionName)
           Destination: AzureBlob
           storage: $(storageAccountName)
-          ContainerName: $(storageFolderProd)
+          ContainerName: $(storageFolderQA)
           BlobPrefix: IoT-Simulator/
           sasTokenTimeOutInMinutes: 240

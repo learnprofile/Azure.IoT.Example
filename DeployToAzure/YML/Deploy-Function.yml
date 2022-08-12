@@ -1,11 +1,11 @@
 # ------------------------------------------------------------------------------------------------------------------------
-# Build for IoT Function App Processor for the IoT Demo Project
+# Pipeline to deploy IoT Function App Processor for the IoT Demo Project
 # ------------------------------------------------------------------------------------------------------------------------
-# Create a variable group for each environment with these variables:
+# Note 1: This pipeline needs a variable group "IoTDemo-Deploy-FunctionApp" with these variables:
 #   subscriptionNameDev: '<ServiceConnectionName / Subscription Name>'
-#   functionAppNameDev: 'lll-iotdemo-process-dev'
-#   subscriptionNameQA: '<ServiceConnectionName / Subscription Name>'
-#   functionAppNameQA: 'lll-iotdemo-process-qa'
+#   functionAppNameDev:  '<org>-iotdemo-process-dev'
+#   subscriptionNameQA:  '<ServiceConnectionName / Subscription Name>'
+#   functionAppNameQA:   '<org>-iotdemo-process-qa'
 # ------------------------------------------------------------------------------------------------------------------------
 name: $(date:yyyy).$(date:MM).$(date:dd)$(rev:.r)
 pool:
