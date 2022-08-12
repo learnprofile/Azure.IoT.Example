@@ -36,6 +36,20 @@ stages:
 - stage: DeployDEVResources
   displayName: DEV Deploy Resources
   jobs:
+  # 1. Need a way to create resource group if it doesn't exist...
+  # - script: New-AzResourceGroup -Name rg_iotdemo_dev -Location "eastUS"
+  #   displayName: Create ResourceGroup
+
+  # 2a. Find a way to get the Owner GUID from AD and pass that into a variable
+  # - script: 
+  #      Connect-AzureAD
+  #      $owner1UserObjectId = (Get-AzureAdUser -ObjectId "lyleluppes@microsoft.com").ObjectId
+  #      echo "##vso[task.setvariable variable=owner1UserObjectId]$(owner1UserObjectId)"
+  #      $owner2UserObjectId = (Get-AzureAdUser -ObjectId "chrishouse@microsoft.com").ObjectId
+  #      echo "##vso[task.setvariable variable=owner2UserObjectId]$(owner1UserObjectId)"
+  #   displayName: Get Owner 1 Id
+  # 2b. Next step: pass this variable parameter into the Bicep file
+
   - template: Deploy-Bicep.yml
     parameters:
       variableGroupName: 'IoTDemo-Infra-Dev'

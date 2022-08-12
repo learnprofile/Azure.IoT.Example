@@ -25,7 +25,8 @@ param runDateTime string = utcNow()
 var deploymentSuffix = '-deploy-${runDateTime}'
 
 // --------------------------------------------------------------------------------
-// doesn't work right yet...!
+// TODO: I need a way to create a resource group here, but these don't work yet...!
+// --------------------------------------------------------------------------------
 // module resourceGroupModule 'resourceGroup.bicep' = {
 //   name: 'resourceGroup${deploymentSuffix}'
 //   params: {
@@ -36,6 +37,22 @@ var deploymentSuffix = '-deploy-${runDateTime}'
 //     runDateTime: runDateTime
 //   }
 // }
+// module exampleSubModule 'subModule.bicep' = {
+//   name: 'deployToSub'
+//   scope: subscription()
+// }
+// output subscriptionOutput object = subscription()
+// module exampleModule 'rgModule.bicep' = {
+//   name: 'exampleModule'
+//   scope: resourceGroup(resourceGroupName)
+// }
+// output resourceGroupOutput object = resourceGroup()
+// resource resourceGroupResource 'Microsoft.Resources/resourceGroups@2021-01-01' = {
+//    name: 'rg-iotdemo-dev'
+//    location: location
+//    targetScope = subscriptionOutput
+// }
+
 module servicebusModule 'serviceBus.bicep' = {
   name: 'servicebus${deploymentSuffix}'
   // dependsOn: [ resourceGroupModule ]
