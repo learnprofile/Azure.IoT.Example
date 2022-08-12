@@ -1,6 +1,9 @@
 # ------------------------------------------------------------------------------------------------------------------------
 # Build for IoT Simulator, compiles for both Windows (x64) and Linux
 # ------------------------------------------------------------------------------------------------------------------------
+# Note: In order for AzFileCopy to work, you need to find the account that drives the pipeline, then add that to the 
+#   storage account role -> "Storage Blob Data Owner"
+# ------------------------------------------------------------------------------------------------------------------------
 # Note: this job needs VariableGroup "CodeSigning" to work (to setup: go to Edit Triggers, then add via Variables tab...)
 # This Variable Group provides these values:
 #   $(SubscriptionName) = Your Subscription Name <guid>
@@ -10,6 +13,7 @@
 #   $(SigningAppRegClientSecret) = <secret>
 #   $(ActiveDirectoryTenantId) = <AD Tenant guid>
 #   $(TimestampUrl) =?= http://timestamp.digicert.com
+# ------------------------------------------------------------------------------------------------------------------------
 
 trigger:
   branches:
