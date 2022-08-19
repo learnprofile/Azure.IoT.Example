@@ -13,6 +13,7 @@ param runDateTime string = utcNow()
 param templateFileName string = '~website.bicep'
 @allowed(['F1','B1','B2','S1','S2','S3'])
 param sku string = 'F1'
+param keyVaultName string
 
 param webAppName string = 'dashboard'
 
@@ -22,7 +23,6 @@ var webSiteName = toLower('${orgPrefix}-${appPrefix}-${webAppName}-${environment
 var webSiteAppServicePlanName = toLower('${webSiteName}-appsvc')
 var webSiteAppInsightsName = toLower('${webSiteName}-insights')
 
-var keyVaultName = '${orgPrefix}${appPrefix}vault${environmentCode}${appSuffix}'
 var iotHubKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotHubConnectionString)'
 var iotStorageKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotStorageAccountConnectionString)'
 var cosmosKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=cosmosConnectionString)'

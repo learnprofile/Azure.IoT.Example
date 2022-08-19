@@ -1,5 +1,6 @@
 // --------------------------------------------------------------------------------
 // This BICEP file will create a KeyVault
+// To purse a KV with soft delete enabled: > az keyvault purge --name keyvaultname
 // --------------------------------------------------------------------------------
 param orgPrefix string = 'org'
 param appPrefix string = 'app'
@@ -9,14 +10,29 @@ param appSuffix string = '1'
 param location string = resourceGroup().location
 param runDateTime string = utcNow()
 param templateFileName string = '~keyVault.bicep'
+param keyVaultName string = 'kvName'
 
-param functionAppPrincipalId string 
-param webSiteAppPrincipalId string 
-param owner1UserObjectId string = 'd4aaf634-e777-4307-bb6e-7bf2305d166e' // Lyle's AD Guid
-param owner2UserObjectId string = '209019b5-167b-45cd-ab9c-f987fa262040' // Chris's AD Guid
+param adminUserObjectIds array
+param applicationUserObjectIds array
 
 // --------------------------------------------------------------------------------
-var keyVaultName = '${orgPrefix}${appPrefix}vault${environmentCode}${appSuffix}'
+var adminAccessPolicies = [for adminUser in adminUserObjectIds: {
+  objectId: adminUser
+  tenantId: subscription().tenantId
+  permissions: {
+    certificates: [ 'all' ]
+    secrets: [ 'all' ]
+    keys: [ 'all' ]
+  }
+}]
+var applicationUserPolicies = [for appUser in applicationUserObjectIds: {
+  objectId: appUser
+  tenantId: subscription().tenantId
+  permissions: {
+    secrets: [ 'get' ]
+  }
+}]
+var accessPolicies = union(adminAccessPolicies, applicationUserPolicies)
 
 // --------------------------------------------------------------------------------
 resource keyvaultResource 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
@@ -36,44 +52,8 @@ resource keyvaultResource 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
     // Use Access Policies model
     enableRbacAuthorization: false      
     // add function app and web app identities in the access policies so they can read the secrets
-    accessPolicies: [
-      {
-        tenantId: subscription().tenantId
-        objectId:  functionAppPrincipalId
-        permissions: {
-          secrets: [ 'get' ]
-          certificates: [ 'get' ]
-          keys: [ 'get' ]
-        }
-      }
-      {
-        tenantId: subscription().tenantId
-        objectId:  webSiteAppPrincipalId
-        permissions: {
-          secrets: [ 'get' ]
-          certificates: [ 'get' ]
-          keys: [ 'get' ]
-        }
-      }
-      {
-        tenantId: subscription().tenantId
-        objectId:  owner1UserObjectId
-        permissions: {
-          secrets: ['All']
-          certificates: ['All']
-          keys: ['All']
-        } 
-      }
-      {
-        tenantId: subscription().tenantId
-        objectId:  owner2UserObjectId
-        permissions: {
-          secrets: ['All']
-          certificates: ['All']
-          keys: ['All']
-        } 
-      }
-    ]
+    accessPolicies: accessPolicies
+
     enabledForDeployment: false          // VMs can retrieve certificates
     enabledForTemplateDeployment: false  // ARM can retrieve values
     enablePurgeProtection: true         // Not allowing to purge key vault or its objects after deletion
@@ -81,5 +61,3 @@ resource keyvaultResource 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
     createMode: 'default'               // Creating or updating the key vault (not recovering)
   }
 }
-
-output keyVaultName string = keyVaultName

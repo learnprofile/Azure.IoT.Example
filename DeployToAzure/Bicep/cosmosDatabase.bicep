@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------
-// This BICEP file will create a Cosmos Database for the IoT Demo Project
+// This BICEP file will create a Cosmos Database
 // This expects a parameter with a list of containers/keys, something like this:
 //   var cosmosContainerArray = [
 //     { name: 'products', partitionKey: '/category' }
@@ -15,10 +15,10 @@ param location string = resourceGroup().location
 param runDateTime string = utcNow()
 param templateFileName string = '~cosmosDatabase.bicep'
 param containerArray array
+param cosmosDatabaseName string = 'MyDatabase'
 
 // --------------------------------------------------------------------------------
 var cosmosAccountName = '${orgPrefix}-${appPrefix}-cosmos-${environmentCode}${appSuffix}'
-var cosmosDatabaseName = 'IoTDatabase'
 
 // --------------------------------------------------------------------------------
 resource cosmosAccountResource 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' = {
@@ -69,7 +69,6 @@ resource cosmosAccountResource 'Microsoft.DocumentDB/databaseAccounts@2022-05-15
       periodicModeProperties: {
         backupIntervalInMinutes: 240
         backupRetentionIntervalInHours: 8
-        backupStorageRedundancy: 'Local'
       }
     }
     networkAclBypassResourceIds: []

@@ -5,24 +5,25 @@
 // To deploy this Bicep manually:
 // 	 az login
 //   az account set --subscription <subscriptionId>
-//   az deployment group create -n main-deploy-20220809T170000Z --resource-group rg_iotdemo_dev --template-file 'main.bicep' --parameters environmentCode=dev orgPrefix=xxx appPrefix=iotdemo
-//   az deployment group create -n main-deploy-20220809T170000Z --resource-group rg_iotdemo_qa --template-file 'main.bicep' --parameters environmentCode=qa orgPrefix=xxx appPrefix=iotdemo
+//   az deployment group create -n main-deploy-20220819T164900Z --resource-group rg_iotdemo_dev --template-file 'main.bicep' --parameters environmentCode=dev orgPrefix=xxx appPrefix=iotdemo keyVaultOwnerUserId1=d4aaf634-e777-4307-bb6e-7bf2305d166e keyVaultOwnerUserId2=209019b5-167b-45cd-ab9c-f987fa262040
+//   az deployment group create -n main-deploy-20220819T164900Z --resource-group rg_iotdemo_qa --template-file 'main.bicep' --parameters environmentCode=qa orgPrefix=xxx appPrefix=iotdemo keyVaultOwnerUserId1=d4aaf634-e777-4307-bb6e-7bf2305d166e keyVaultOwnerUserId2=209019b5-167b-45cd-ab9c-f987fa262040
 // --------------------------------------------------------------------------------
 param environmentCode string = 'dev'
 param location string = resourceGroup().location
 param orgPrefix string = 'org'
 param appPrefix string = 'app'
 param appSuffix string = '' // '-1' 
+param storageSku string = 'Standard_LRS'
 param functionAppSku string = 'Y1'
-param functionAppSkuFamily string = 'Y'
 param functionAppSkuTier string = 'Dynamic'
 param webSiteSku string = 'B1'
-param keyVaultOwnerUserId1 string
-param keyVaultOwnerUserId2 string
+param keyVaultOwnerUserId1 string = ''
+param keyVaultOwnerUserId2 string = ''
 param runDateTime string = utcNow()
 
 // --------------------------------------------------------------------------------
 var deploymentSuffix = '-deploy-${runDateTime}'
+var keyVaultName = '${orgPrefix}${appPrefix}vault${environmentCode}${appSuffix}'
 
 // --------------------------------------------------------------------------------
 // TODO: I need a way to create a resource group here, but these don't work yet...!
@@ -52,6 +53,21 @@ var deploymentSuffix = '-deploy-${runDateTime}'
 //    location: location
 //    targetScope = subscriptionOutput
 // }
+
+module storageModule 'storageAccount.bicep' = {
+  name: 'storage${deploymentSuffix}'
+  params: {
+    storageSku: storageSku
+
+    templateFileName: '~storageAccount.bicep'
+    orgPrefix: orgPrefix
+    appPrefix: appPrefix
+    environmentCode: environmentCode
+    appSuffix: appSuffix
+    location: location
+    runDateTime: runDateTime
+  }
+}
 
 module servicebusModule 'serviceBus.bicep' = {
   name: 'servicebus${deploymentSuffix}'
@@ -105,6 +121,7 @@ module cosmosModule 'cosmosDatabase.bicep' = {
   // dependsOn: [ resourceGroupModule ]
   params: {
     containerArray: cosmosContainerArray
+    cosmosDatabaseName: 'IoTDatabase'
 
     templateFileName: '~cosmosDatabase.bicep'
     orgPrefix: orgPrefix
@@ -147,11 +164,13 @@ module streamingModule 'streaming.bicep' = {
 }
 module functionModule 'functionApp.bicep' = {
   name: 'function${deploymentSuffix}'
-  // dependsOn: [ resourceGroupModule ]
+  dependsOn: [ storageModule ]
   params: {
+    functionKind: 'functionapp'
+    functionName: 'process'
     functionAppSku: functionAppSku
-    functionAppSkuFamily: functionAppSkuFamily
     functionAppSkuTier: functionAppSkuTier
+    functionStorageAccountName: storageModule.outputs.functionStorageAccountName
     appInsightsLocation: location
 
     templateFileName: '~functionApp.bicep'
@@ -163,12 +182,31 @@ module functionModule 'functionApp.bicep' = {
     runDateTime: runDateTime
   }
 }
+
+module functionAppSettingsModule './appsettings.bicep' = {
+  name: 'functionAppSettings'
+  dependsOn: [ functionModule, keyVaultModule ]
+  params: {
+    appName: functionModule.outputs.functionAppName
+    customAppSettings: {
+      'MySecrets:IoTHubConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotHubConnectionString)'
+      'MySecrets:SignalRConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=signalRConnectionString)'
+      'MySecrets:ServiceBusConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=serviceBusConnectionString)'
+      'MySecrets:CosmosConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=cosmosConnectionString)'
+      'MySecrets:IotStorageAccountConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotStorageAccountConnectionString)'
+      'MyConfiguration:WriteToCosmosYN': 'Y'
+      'MyConfiguration:WriteToSignalRYN': 'N'
+      ServiceBusConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=serviceBusConnectionString)'
+    }
+  }
+}
+
 module webSiteModule 'webSite.bicep' = {
   name: 'webSite${deploymentSuffix}'
-  // dependsOn: [ resourceGroupModule ]
   params: {
     appInsightsLocation: location
     sku: webSiteSku
+    keyVaultName: keyVaultName
 
     templateFileName: '~webSite1.bicep'
     orgPrefix: orgPrefix
@@ -180,8 +218,24 @@ module webSiteModule 'webSite.bicep' = {
   }
 }
 
-var owner1UserObjectId = keyVaultOwnerUserId1 // Currently pass in the AD Guid
-var owner2UserObjectId = keyVaultOwnerUserId2 // Currently pass in the AD Guid
+module webSiteAppSettingsModule './appsettings.bicep' = {
+  name: 'webSiteAppSettings'
+  dependsOn: [ webSiteModule, keyVaultModule ]
+  params: {
+    appName: webSiteModule.outputs.webSiteName
+    customAppSettings: {
+      EnvironmentName: 'DEV'
+      IoTHubConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotHubConnectionString)'
+      StorageConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotStorageAccountConnectionString)'
+      CosmosConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=cosmosConnectionString)'
+      SignalRConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=signalRConnectionString)'
+      ApplicationInsightsKey: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=webSiteInsightsKey)'
+    }
+  }
+}
+
+var adminUserIds = [ keyVaultOwnerUserId1, keyVaultOwnerUserId2 ]
+var applicationUserIds = [ functionModule.outputs.functionAppPrincipalId, webSiteModule.outputs.websiteAppPrincipalId ]
 // Future: Create a powershell step to retrieve Owner Object Guids from an email address:
 //   > Connect-AzureAD
 //   > $owner1UserObjectId = (Get-AzureAdUser -ObjectId 'someuser@microsoft.com').ObjectId
@@ -190,11 +244,10 @@ module keyVaultModule 'keyVault.bicep' = {
   name: 'keyvault${deploymentSuffix}'
   dependsOn: [ servicebusModule, iotHubModule, dpsModule, cosmosModule, functionModule, webSiteModule ]
   params: {
-    webSiteAppPrincipalId: webSiteModule.outputs.websiteAppPrincipalId
-    functionAppPrincipalId: functionModule.outputs.functionAppPrincipalId
-    owner1UserObjectId: owner1UserObjectId
-    owner2UserObjectId: owner2UserObjectId
-    
+    adminUserObjectIds: adminUserIds
+    applicationUserObjectIds: applicationUserIds
+    keyVaultName: keyVaultName
+
     templateFileName: '~keyVault.bicep'
     orgPrefix: orgPrefix
     appPrefix: appPrefix
@@ -208,7 +261,7 @@ module keyVaultSecretsModule 'keyVaultSecrets.bicep' = {
   name: 'keyvaultSecrets${deploymentSuffix}'
   dependsOn: [ keyVaultModule, servicebusModule, iotHubModule, dpsModule, cosmosModule, functionModule, webSiteModule ]
   params: {
-    keyVaultName: keyVaultModule.outputs.keyVaultName
+    keyVaultName: keyVaultName
     iotHubName: iotHubModule.outputs.iotHubName
     iotStorageAccountName: iotHubModule.outputs.iotStorageAccountName
     functionInsightsKey: functionModule.outputs.functionInsightsKey
