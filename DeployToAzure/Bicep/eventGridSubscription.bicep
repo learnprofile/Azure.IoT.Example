@@ -17,7 +17,7 @@ var eventGridSubscriptionName = '${orgPrefix}${appPrefix}uploadsub${environmentC
 var queueName = 'filemsgs'
 
 // --------------------------------------------------------------------------------
-var iotStorageAccountName = '${orgPrefix}${appPrefix}hub${environmentCode}${appSuffix}store'
+var iotStorageAccountName = '${orgPrefix}${appPrefix}stghub${environmentCode}${appSuffix}'
 var iotStorageAccountNameSpace = '${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.Storage/StorageAccounts/${iotStorageAccountName}'
 
 var svcBusName = '${orgPrefix}${appPrefix}svcbus${environmentCode}${appSuffix}'

@@ -19,7 +19,7 @@ param sku string = 'S1'
 
 // --------------------------------------------------------------------------------
 var iotHubName            = '${orgPrefix}-${appPrefix}-hub-${environmentCode}${appSuffix}'
-var iotStorageAccountName = '${orgPrefix}${appPrefix}storehub${environmentCode}${appSuffix}'
+var iotStorageAccountName = '${orgPrefix}${appPrefix}stghub${environmentCode}${appSuffix}'
 var iotStorageContainerName = 'iothubuploads'
 
 // --------------------------------------------------------------------------------

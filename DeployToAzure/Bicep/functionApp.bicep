@@ -23,7 +23,7 @@ param storageAccountType string = 'Standard_LRS'
 // --------------------------------------------------------------------------------
 var functionName = 'process'
 var functionAppName = toLower('${orgPrefix}-${appPrefix}-${functionName}-${environmentCode}${appSuffix}')
-var functionStorageAccountName = toLower('${orgPrefix}${appPrefix}storefun${environmentCode}${appSuffix}')
+var functionStorageAccountName = toLower('${orgPrefix}${appPrefix}stgfun${environmentCode}${appSuffix}')
 var appServicePlanName = toLower('${functionAppName}-appsvc')
 var functionInsightsName = toLower('${functionAppName}-insights')
 var keyVaultName = '${orgPrefix}${appPrefix}vault${environmentCode}${appSuffix}'
