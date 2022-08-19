@@ -1,3 +1,9 @@
+# ---------------------------------------------------------------------------------------------------------
+# For this to run right, you will have to do this first in your Powershell environment:
+#  > az login
+#  > az account set --subscription xxxxxx-xxxx-xxxx-xxxx-xxxxxx
+# ---------------------------------------------------------------------------------------------------------
+
 param(
   #[Parameter(Mandatory)] [ValidateSet('start','stop')] [string]$action,
   [Parameter()] [string]$action,
