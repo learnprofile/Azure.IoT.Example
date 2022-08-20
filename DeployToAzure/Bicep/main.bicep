@@ -185,12 +185,15 @@ module functionModule 'functionApp.bicep' = {
   }
 }
 
-module functionAppSettingsModule './appSettings.bicep' = {
+module functionAppSettingsModule './functionAppSettings.bicep' = {
   name: 'functionAppSettings${deploymentSuffix}'
   dependsOn: [ functionModule ]
   params: {
-    appName: functionModule.outputs.functionAppName
+    functionAppName: functionModule.outputs.functionAppName
+    functionStorageAccountName: functionModule.outputs.functionStorageAccountName
+    functionInsightsKey: functionModule.outputs.functionInsightsKey
     customAppSettings: {
+      ServiceBusConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=serviceBusConnectionString)'
       'MySecrets:IoTHubConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotHubConnectionString)'
       'MySecrets:SignalRConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=signalRConnectionString)'
       'MySecrets:ServiceBusConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=serviceBusConnectionString)'
@@ -198,7 +201,6 @@ module functionAppSettingsModule './appSettings.bicep' = {
       'MySecrets:IotStorageAccountConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotStorageAccountConnectionString)'
       'MyConfiguration:WriteToCosmosYN': 'Y'
       'MyConfiguration:WriteToSignalRYN': 'N'
-      ServiceBusConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=serviceBusConnectionString)'
     }
   }
 }
@@ -209,7 +211,6 @@ module webSiteModule 'webSite.bicep' = {
   params: {
     appInsightsLocation: location
     sku: webSiteSku
-    keyVaultName: keyVaultName
 
     templateFileName: '~webSite1.bicep'
     orgPrefix: orgPrefix
@@ -221,11 +222,11 @@ module webSiteModule 'webSite.bicep' = {
   }
 }
 
-module webSiteAppSettingsModule './appSettings.bicep' = {
+module webSiteAppSettingsModule './webSiteAppSettings.bicep' = {
   name: 'webSiteAppSettings${deploymentSuffix}'
   dependsOn: [ webSiteModule ]
   params: {
-    appName: webSiteModule.outputs.webSiteName
+    webAppName: webSiteModule.outputs.webSiteName
     customAppSettings: {
       EnvironmentName: environmentCode
       IoTHubConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotHubConnectionString)'

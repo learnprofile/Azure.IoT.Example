@@ -1,60 +1,32 @@
-// ----------------------------------------------------------------------------------------------------
-// EXPERIMENT: See if we can split out appSettings into separate file... ?????
-// ----------------------------------------------------------------------------------------------------
-
-
-// ----------------------------------------------------------------------------------------------------
-// This BICEP file will create an Azure Function for the IoT Demo Project
-// ----------------------------------------------------------------------------------------------------
-// TODO: can I split the unique configuration keys out into a separate file to make this more generic?
-// ----------------------------------------------------------------------------------------------------
-param orgPrefix string = 'org'
-param appPrefix string = 'app'
-@allowed([ 'dev', 'qa', 'stg', 'prod' ])
-param environmentCode string = 'dev'
-param appSuffix string = '1'
-param keyVaultName string
-param appInsightsKey string
-
 // --------------------------------------------------------------------------------
-var functionName = 'process'
-var functionAppName = toLower('${orgPrefix}-${appPrefix}-${functionName}-${environmentCode}${appSuffix}')
-var functionStorageAccountName = toLower('${orgPrefix}${appPrefix}stgfun${environmentCode}${appSuffix}')
-
+// This BICEP file will add unique Configuration settings to a web or function app
+// ----------------------------------------------------------------------------------------------------
+// To deploy this Bicep manually:
+//   az deployment group create -n main-deploy-20220820T140100Z --resource-group rg_iotdemo_dev --template-file 'functionAppSettings.bicep' --parameters functionAppName='lll-iotdemo-process-dev' functionStorageAccountName='llliotdemofuncdevstore' functionInsightsName='lll-iotdemo-process-dev-insights' customAppSettings="{'dateTested':'20220820T140100Z'}" 
 // --------------------------------------------------------------------------------
-var iotHubKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotHubConnectionString)'
-var signalRKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=signalRConnectionString)'
-var serviceBusKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=serviceBusConnectionString)'
-var cosmosKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=cosmosConnectionString)'
-var iotStorageKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotStorageAccountConnectionString)'
+param functionAppName string
+param functionStorageAccountName string
+param functionInsightsKey string
+param customAppSettings object
 
-resource storageAccountResource 'Microsoft.Storage/storageAccounts@2021-08-01' existing = {
-  name: functionStorageAccountName
-}
-var functionStorageAccountConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccountResource.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(storageAccountResource.id, storageAccountResource.apiVersion).keys[0].value}'
+resource storageAccountResource 'Microsoft.Storage/storageAccounts@2019-06-01' existing = { name: functionStorageAccountName }
+var storageAccountConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccountResource.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(storageAccountResource.id, storageAccountResource.apiVersion).keys[0].value}'
 
-resource functionAppResource 'Microsoft.Web/sites@2021-03-01' existing = {
-  name: functionAppName
+var BASE_SLOT_APPSETTINGS = {
+  AzureWebJobsStorage: storageAccountConnectionString
+  WEBSITE_CONTENTAZUREFILECONNECTIONSTRING: storageAccountConnectionString
+  WEBSITE_CONTENTSHARE: functionAppName
+  APPINSIGHTS_INSTRUMENTATIONKEY: functionInsightsKey
+  APPLICATIONINSIGHTS_CONNECTION_STRING: 'InstrumentationKey=${functionInsightsKey}'
+  FUNCTIONS_WORKER_RUNTIME: 'dotnet'
+  FUNCTIONS_EXTENSION_VERSION: '~4'
 }
-resource functionAppConfigResource 'Microsoft.Web/sites/config@2022-03-01' = {
-  name: 'appsettings'
-  parent: functionAppResource
-  properties: {
-    appSettings: {
-      [
-      AzureWebJobsStorage: functionStorageAccountConnectionString
-      WEBSITE_CONTENTAZUREFILECONNECTIONSTRING: functionStorageAccountConnectionString 
-      WEBSITE_CONTENTSHARE: toLower(functionAppName) 
-      APPINSIGHTS_INSTRUMENTATIONKEY: appInsightsKey 
-      FUNCTIONS_WORKER_RUNTIME: 'dotnet' 
-      FUNCTIONS_EXTENSION_VERSION: '~4' 
-      IoTHubConnectionString: iotHubKeyVaultReference 
-      SignalRConnectionString: signalRKeyVaultReference
-      ServiceBusConnectionString: serviceBusKeyVaultReference
-      CosmosConnectionString: cosmosKeyVaultReference
-      IotStorageAccountConnectionString: iotStorageKeyVaultReference
-      WriteToCosmosYN: 'Y'
-      WriteToSignalRYN: 'N'
-    ]
-  }
+
+// This *should* work, but I keep getting a "circular dependency detected" error and it doesn't work
+// resource appResource 'Microsoft.Web/sites@2021-03-01' existing = { name: functionAppName }
+// var BASE_SLOT_APPSETTINGS = list('${appResource.id}/config/appsettings', appResource.apiVersion).properties
+
+resource siteConfig 'Microsoft.Web/sites/config@2021-02-01' = {
+  name: '${functionAppName}/appsettings'
+  properties: union(BASE_SLOT_APPSETTINGS, customAppSettings)
 }

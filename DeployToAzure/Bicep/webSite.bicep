@@ -13,7 +13,6 @@ param runDateTime string = utcNow()
 param templateFileName string = '~website.bicep'
 @allowed(['F1','B1','B2','S1','S2','S3'])
 param sku string = 'F1'
-param keyVaultName string
 
 param webAppName string = 'dashboard'
 
@@ -22,12 +21,6 @@ var linuxFxVersion = 'DOTNETCORE|6.0' // 	The runtime stack of web app
 var webSiteName = toLower('${orgPrefix}-${appPrefix}-${webAppName}-${environmentCode}${appSuffix}')
 var webSiteAppServicePlanName = toLower('${webSiteName}-appsvc')
 var webSiteAppInsightsName = toLower('${webSiteName}-insights')
-
-var iotHubKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotHubConnectionString)'
-var iotStorageKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotStorageAccountConnectionString)'
-var cosmosKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=cosmosConnectionString)'
-var signalRKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=signalRConnectionString)'
-var appInsightsKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=webSiteInsightsKey)'
 
 // --------------------------------------------------------------------------------
 resource webSiteAppServicePlanResource 'Microsoft.Web/serverfarms@2020-06-01' = {
@@ -58,32 +51,7 @@ resource webSiteAppServiceResource 'Microsoft.Web/sites@2020-06-01' = {
     serverFarmId: webSiteAppServicePlanResource.id
     siteConfig: {
       linuxFxVersion: linuxFxVersion
-      appSettings: [
-        {
-          name: 'EnvironmentName'
-          value: 'DEV'
-        }
-        {
-          name: 'IoTHubConnectionString'
-          value: iotHubKeyVaultReference
-        }
-        {
-          name: 'StorageConnectionString'
-          value: iotStorageKeyVaultReference
-        }
-        {
-          name: 'CosmosConnectionString'
-          value: cosmosKeyVaultReference
-        }
-        {
-          name: 'SignalRConnectionString'
-          value: signalRKeyVaultReference
-        }
-        {
-          name: 'ApplicationInsightsKey'
-          value: appInsightsKeyVaultReference
-        }        
-      ]
+      appSettings: []
     }
   }
 }

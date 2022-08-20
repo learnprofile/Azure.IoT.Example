@@ -13,7 +13,6 @@ param location string = resourceGroup().location
 param appInsightsLocation string = resourceGroup().location
 param runDateTime string = utcNow()
 param templateFileName string = '~functionApp.bicep'
-//param keyVaultName string
 
 param functionName string = 'func'
 @allowed([ 'functionapp', 'functionapp,linux' ])
@@ -22,13 +21,6 @@ param functionAppSku string = 'Y1'
 param functionAppSkuFamily string = 'Y'
 param functionAppSkuTier string = 'Dynamic'
 param functionStorageAccountName string
-
-// --------------------------------------------------------------------------------
-// var iotHubKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotHubConnectionString)'
-// var signalRKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=signalRConnectionString)'
-// var serviceBusKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=serviceBusConnectionString)'
-// var cosmosKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=cosmosConnectionString)'
-// var iotStorageKeyVaultReference = '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotStorageAccountConnectionString)'
 
 // --------------------------------------------------------------------------------
 var functionAppName = toLower('${orgPrefix}-${appPrefix}-${functionName}-${environmentCode}${appSuffix}')
@@ -129,38 +121,6 @@ resource functionAppResource 'Microsoft.Web/sites@2021-03-01' = {
           name: 'FUNCTIONS_EXTENSION_VERSION'
           value: '~4'
         }
-        // {
-        //   name: 'MySecrets:IoTHubConnectionString'
-        //   value: iotHubKeyVaultReference
-        // }
-        // {
-        //   name: 'MySecrets:SignalRConnectionString'
-        //   value: signalRKeyVaultReference
-        // }
-        // {
-        //   name: 'MySecrets:ServiceBusConnectionString'
-        //   value: serviceBusKeyVaultReference
-        // }
-        // {
-        //   name: 'MySecrets:CosmosConnectionString'
-        //   value: cosmosKeyVaultReference
-        // }
-        // {
-        //   name: 'MySecrets:IotStorageAccountConnectionString'
-        //   value: iotStorageKeyVaultReference
-        // }
-        // {
-        //   name: 'MyConfiguration:WriteToCosmosYN'
-        //   value: 'Y'
-        // }
-        // {
-        //   name: 'MyConfiguration:WriteToSignalRYN'
-        //   value: 'N'
-        // }
-        // {
-        //   name: 'ServiceBusConnectionString'
-        //   value: serviceBusKeyVaultReference
-        // }
       ]
       ftpsState: 'FtpsOnly'
       minTlsVersion: '1.2'
