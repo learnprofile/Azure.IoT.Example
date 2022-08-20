@@ -187,7 +187,7 @@ module functionModule 'functionApp.bicep' = {
 
 module functionAppSettingsModule './appSettings.bicep' = {
   name: 'functionAppSettings'
-  dependsOn: [ functionModule, keyVaultModule ]
+  dependsOn: [ functionModule ]
   params: {
     appName: functionModule.outputs.functionAppName
     customAppSettings: {
@@ -222,11 +222,11 @@ module webSiteModule 'webSite.bicep' = {
 
 module webSiteAppSettingsModule './appSettings.bicep' = {
   name: 'webSiteAppSettings'
-  dependsOn: [ webSiteModule, keyVaultModule ]
+  dependsOn: [ webSiteModule ]
   params: {
     appName: webSiteModule.outputs.webSiteName
     customAppSettings: {
-      EnvironmentName: 'DEV'
+      EnvironmentName: environmentCode
       IoTHubConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotHubConnectionString)'
       StorageConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotStorageAccountConnectionString)'
       CosmosConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=cosmosConnectionString)'
