@@ -15,6 +15,7 @@ param appPrefix string = 'app'
 param appSuffix string = '' // '-1' 
 param storageSku string = 'Standard_LRS'
 param functionAppSku string = 'Y1'
+param functionAppSkuFamily string = 'Y'
 param functionAppSkuTier string = 'Dynamic'
 param webSiteSku string = 'B1'
 param keyVaultOwnerUserId1 string = ''
@@ -166,9 +167,10 @@ module functionModule 'functionApp.bicep' = {
   name: 'function${deploymentSuffix}'
   dependsOn: [ storageModule ]
   params: {
-    functionKind: 'functionapp'
     functionName: 'process'
+    functionKind: 'functionapp'
     functionAppSku: functionAppSku
+    functionAppSkuFamily: functionAppSkuFamily
     functionAppSkuTier: functionAppSkuTier
     functionStorageAccountName: storageModule.outputs.functionStorageAccountName
     appInsightsLocation: location
