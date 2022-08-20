@@ -9,9 +9,9 @@ This project has Bicep deploys for all sorts of objects that coordinate with eac
 ---
 
 ## 1. Before Deploy
-1.1. Create AzDo environments listed in DeployToAzure/Environments folder. The YAML files are created with a DEV and QA environment, but that can easily be extended that to how ever many are needed.
+1.1. Create AzDo environments listed in DeployToAzure/Environments folder. The YAML files are created with a DEV and QA environment, but that can easily be extended that to how ever many environments are needed.
 
-1.2. Create variable groups as shown in DeployToAzure/VariableGroups and fill in with appropriate data (i.e. subscription info, desired app name, etc.). The Bicep files are designed to use a three character* Organization Code (or user initials), and a 6 character Application Name, forming standardized and unique names for each environment. 
+1.2. Create variable groups as shown in DeployToAzure/VariableGroups and fill in with appropriate data (i.e. subscription info, desired app name, etc.). The Bicep files are designed to use a three character* OrgCode (or user initials), and a six character Application Name, forming standardized and unique names for each environment. 
 
     *Longer names can be specified, but some objects might exceed the max name length!
 
@@ -23,7 +23,7 @@ This project has Bicep deploys for all sorts of objects that coordinate with eac
 ## 3. Post-Deploy
 3.1. Create/purchase a root certificate for use in DPS and have the ability to create a leaf certificates for devices
 
-3.2. Add tye certificate that was obtained to the DPS certificate store
+3.2. Add the certificate that was obtained to the DPS certificate store
 
 3.3. Create a DPS enrollment group based on the certificate. 
 

@@ -72,7 +72,6 @@ module storageModule 'storageAccount.bicep' = {
 
 module servicebusModule 'serviceBus.bicep' = {
   name: 'servicebus${deploymentSuffix}'
-  // dependsOn: [ resourceGroupModule ]
   params: {
     queueNames: [ 'iotmsgs', 'filemsgs' ]
 
@@ -87,7 +86,6 @@ module servicebusModule 'serviceBus.bicep' = {
 }
 module iotHubModule 'iotHub.bicep' = {
   name: 'iotHub${deploymentSuffix}'
-  // dependsOn: [ resourceGroupModule ]
   params: {
     templateFileName: '~iotHub.bicep'
     orgPrefix: orgPrefix
@@ -119,7 +117,6 @@ var cosmosContainerArray = [
 ]
 module cosmosModule 'cosmosDatabase.bicep' = {
   name: 'cosmos${deploymentSuffix}'
-  // dependsOn: [ resourceGroupModule ]
   params: {
     containerArray: cosmosContainerArray
     cosmosDatabaseName: 'IoTDatabase'
@@ -135,7 +132,6 @@ module cosmosModule 'cosmosDatabase.bicep' = {
 }
 module signalRModule 'signalR.bicep' = {
   name: 'signalR${deploymentSuffix}'
-  // dependsOn: [ resourceGroupModule ]
   params: {
     templateFileName: '~signalR.bicep'
     orgPrefix: orgPrefix
@@ -148,7 +144,6 @@ module signalRModule 'signalR.bicep' = {
 }
 module streamingModule 'streaming.bicep' = {
   name: 'streaming${deploymentSuffix}'
-  // dependsOn: [ resourceGroupModule ]
   params: {
     iotHubName: iotHubModule.outputs.iotHubName
     svcBusName: servicebusModule.outputs.serviceBusName
@@ -185,9 +180,58 @@ module functionModule 'functionApp.bicep' = {
   }
 }
 
+module webSiteModule 'webSite.bicep' = {
+  name: 'webSite${deploymentSuffix}'
+  params: {
+    appInsightsLocation: location
+    sku: webSiteSku
+
+    templateFileName: '~webSite.bicep'
+    orgPrefix: orgPrefix
+    appPrefix: appPrefix
+    environmentCode: environmentCode
+    appSuffix: appSuffix
+    location: location
+    runDateTime: runDateTime
+  }
+}
+
+var adminUserIds = [ keyVaultOwnerUserId1, keyVaultOwnerUserId2 ]
+var applicationUserIds = [ functionModule.outputs.functionAppPrincipalId, webSiteModule.outputs.websiteAppPrincipalId ]
+module keyVaultModule 'keyVault.bicep' = {
+  name: 'keyvault${deploymentSuffix}'
+  dependsOn: [ functionModule, webSiteModule ]
+  params: {
+    adminUserObjectIds: adminUserIds
+    applicationUserObjectIds: applicationUserIds
+    keyVaultName: keyVaultName
+
+    templateFileName: '~keyVault.bicep'
+    orgPrefix: orgPrefix
+    appPrefix: appPrefix
+    environmentCode: environmentCode
+    appSuffix: appSuffix
+    location: location
+    runDateTime: runDateTime
+  }
+}
+module keyVaultSecretsModule 'keyVaultSecrets.bicep' = {
+  name: 'keyvaultSecrets${deploymentSuffix}'
+  params: {
+    keyVaultName: keyVaultName
+    cosmosAccountName: cosmosModule.outputs.cosmosAccountName
+    functionInsightsKey: functionModule.outputs.functionInsightsKey
+    iotHubName: iotHubModule.outputs.iotHubName
+    iotStorageAccountName: iotHubModule.outputs.iotStorageAccountName
+    serviceBusName: servicebusModule.outputs.serviceBusName
+    signalRName: signalRModule.outputs.signalRName
+    webSiteInsightsKey: webSiteModule.outputs.webSiteAppInsightsKey
+  }
+}
+
 module functionAppSettingsModule './functionAppSettings.bicep' = {
   name: 'functionAppSettings${deploymentSuffix}'
-  dependsOn: [ functionModule ]
+  dependsOn: [ keyVaultSecretsModule ]
   params: {
     functionAppName: functionModule.outputs.functionAppName
     functionStorageAccountName: functionModule.outputs.functionStorageAccountName
@@ -205,26 +249,9 @@ module functionAppSettingsModule './functionAppSettings.bicep' = {
   }
 }
 
-module webSiteModule 'webSite.bicep' = {
-  name: 'webSite${deploymentSuffix}'
-  dependsOn: [ storageModule ]
-  params: {
-    appInsightsLocation: location
-    sku: webSiteSku
-
-    templateFileName: '~webSite1.bicep'
-    orgPrefix: orgPrefix
-    appPrefix: appPrefix
-    environmentCode: environmentCode
-    appSuffix: appSuffix
-    location: location
-    runDateTime: runDateTime
-  }
-}
-
 module webSiteAppSettingsModule './webSiteAppSettings.bicep' = {
   name: 'webSiteAppSettings${deploymentSuffix}'
-  dependsOn: [ webSiteModule ]
+  dependsOn: [ keyVaultSecretsModule ]
   params: {
     webAppName: webSiteModule.outputs.webSiteName
     customAppSettings: {
@@ -235,43 +262,5 @@ module webSiteAppSettingsModule './webSiteAppSettings.bicep' = {
       SignalRConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=signalRConnectionString)'
       ApplicationInsightsKey: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=webSiteInsightsKey)'
     }
-  }
-}
-
-var adminUserIds = [ keyVaultOwnerUserId1, keyVaultOwnerUserId2 ]
-var applicationUserIds = [ functionModule.outputs.functionAppPrincipalId, webSiteModule.outputs.websiteAppPrincipalId ]
-// Future: Create a powershell step to retrieve Owner Object Guids from an email address:
-//   > Connect-AzureAD
-//   > $owner1UserObjectId = (Get-AzureAdUser -ObjectId 'someuser@microsoft.com').ObjectId
-
-module keyVaultModule 'keyVault.bicep' = {
-  name: 'keyvault${deploymentSuffix}'
-  dependsOn: [ servicebusModule, iotHubModule, dpsModule, cosmosModule, functionAppSettingsModule, webSiteAppSettingsModule ]
-  params: {
-    adminUserObjectIds: adminUserIds
-    applicationUserObjectIds: applicationUserIds
-    keyVaultName: keyVaultName
-
-    templateFileName: '~keyVault.bicep'
-    orgPrefix: orgPrefix
-    appPrefix: appPrefix
-    environmentCode: environmentCode
-    appSuffix: appSuffix
-    location: location
-    runDateTime: runDateTime
-  }
-}
-module keyVaultSecretsModule 'keyVaultSecrets.bicep' = {
-  name: 'keyvaultSecrets${deploymentSuffix}'
-  dependsOn: [ keyVaultModule ]
-  params: {
-    keyVaultName: keyVaultName
-    iotHubName: iotHubModule.outputs.iotHubName
-    iotStorageAccountName: iotHubModule.outputs.iotStorageAccountName
-    functionInsightsKey: functionModule.outputs.functionInsightsKey
-    webSiteInsightsKey: webSiteModule.outputs.webSiteAppInsightsKey
-    signalRName: signalRModule.outputs.signalRName
-    cosmosAccountName: cosmosModule.outputs.cosmosAccountName
-    serviceBusName: servicebusModule.outputs.serviceBusName
   }
 }
