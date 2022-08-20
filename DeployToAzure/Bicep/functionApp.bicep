@@ -1,6 +1,9 @@
 // ----------------------------------------------------------------------------------------------------
 // This BICEP file will create an Azure Function
 // ----------------------------------------------------------------------------------------------------
+// To deploy this Bicep manually:
+//   az deployment group create -n main-deploy-20220819T164900Z --resource-group rg_iotdemo_dev --template-file 'functionApp.bicep' --parameters orgPrefix=xxx environmentCode=dev appPrefix=iotdemo functionKind=functionapp functionStorageAccountName=xxxiotdemofuncdevstore
+// ----------------------------------------------------------------------------------------------------
 param orgPrefix string = 'org'
 param appPrefix string = 'app'
 @allowed([ 'dev', 'qa', 'stg', 'prod' ])
