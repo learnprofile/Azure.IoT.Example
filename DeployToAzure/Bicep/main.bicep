@@ -183,7 +183,7 @@ module functionModule 'functionApp.bicep' = {
   }
 }
 
-module functionAppSettingsModule './appsettings.bicep' = {
+module functionAppSettingsModule './appSettings.bicep' = {
   name: 'functionAppSettings'
   dependsOn: [ functionModule, keyVaultModule ]
   params: {
@@ -218,7 +218,7 @@ module webSiteModule 'webSite.bicep' = {
   }
 }
 
-module webSiteAppSettingsModule './appsettings.bicep' = {
+module webSiteAppSettingsModule './appSettings.bicep' = {
   name: 'webSiteAppSettings'
   dependsOn: [ webSiteModule, keyVaultModule ]
   params: {
