@@ -186,7 +186,7 @@ module functionModule 'functionApp.bicep' = {
 }
 
 module functionAppSettingsModule './appSettings.bicep' = {
-  name: 'functionAppSettings'
+  name: 'functionAppSettings${deploymentSuffix}'
   dependsOn: [ functionModule ]
   params: {
     appName: functionModule.outputs.functionAppName
@@ -205,6 +205,7 @@ module functionAppSettingsModule './appSettings.bicep' = {
 
 module webSiteModule 'webSite.bicep' = {
   name: 'webSite${deploymentSuffix}'
+  dependsOn: [ storageModule ]
   params: {
     appInsightsLocation: location
     sku: webSiteSku
@@ -221,7 +222,7 @@ module webSiteModule 'webSite.bicep' = {
 }
 
 module webSiteAppSettingsModule './appSettings.bicep' = {
-  name: 'webSiteAppSettings'
+  name: 'webSiteAppSettings${deploymentSuffix}'
   dependsOn: [ webSiteModule ]
   params: {
     appName: webSiteModule.outputs.webSiteName
@@ -244,7 +245,7 @@ var applicationUserIds = [ functionModule.outputs.functionAppPrincipalId, webSit
 
 module keyVaultModule 'keyVault.bicep' = {
   name: 'keyvault${deploymentSuffix}'
-  dependsOn: [ servicebusModule, iotHubModule, dpsModule, cosmosModule, functionModule, webSiteModule ]
+  dependsOn: [ servicebusModule, iotHubModule, dpsModule, cosmosModule, functionAppSettingsModule, webSiteAppSettingsModule ]
   params: {
     adminUserObjectIds: adminUserIds
     applicationUserObjectIds: applicationUserIds
@@ -261,7 +262,7 @@ module keyVaultModule 'keyVault.bicep' = {
 }
 module keyVaultSecretsModule 'keyVaultSecrets.bicep' = {
   name: 'keyvaultSecrets${deploymentSuffix}'
-  dependsOn: [ keyVaultModule, servicebusModule, iotHubModule, dpsModule, cosmosModule, functionModule, webSiteModule ]
+  dependsOn: [ keyVaultModule ]
   params: {
     keyVaultName: keyVaultName
     iotHubName: iotHubModule.outputs.iotHubName
