@@ -5,8 +5,8 @@
 // To deploy this Bicep manually:
 // 	 az login
 //   az account set --subscription <subscriptionId>
-//   az deployment group create -n main-deploy-20220819T164900Z --resource-group rg_iotdemo_dev --template-file 'main.bicep' --parameters environmentCode=dev orgPrefix=xxx appPrefix=iotdemo keyVaultOwnerUserId1=d4aaf634-e777-4307-bb6e-7bf2305d166e keyVaultOwnerUserId2=209019b5-167b-45cd-ab9c-f987fa262040
-//   az deployment group create -n main-deploy-20220819T164900Z --resource-group rg_iotdemo_qa --template-file 'main.bicep' --parameters environmentCode=qa orgPrefix=xxx appPrefix=iotdemo keyVaultOwnerUserId1=d4aaf634-e777-4307-bb6e-7bf2305d166e keyVaultOwnerUserId2=209019b5-167b-45cd-ab9c-f987fa262040
+//   az deployment group create -n main-deploy-20220819T164900Z --resource-group rg_iotdemo_dev --template-file 'main.bicep' --parameters environmentCode=dev orgPrefix=lll appPrefix=iotdemo keyVaultOwnerUserId1=d4aaf634-e777-4307-bb6e-7bf2305d166e keyVaultOwnerUserId2=209019b5-167b-45cd-ab9c-f987fa262040
+//   az deployment group create -n main-deploy-20220819T164900Z --resource-group rg_iotdemo_qa --template-file 'main.bicep' --parameters environmentCode=qa orgPrefix=lll appPrefix=iotdemo keyVaultOwnerUserId1=d4aaf634-e777-4307-bb6e-7bf2305d166e keyVaultOwnerUserId2=209019b5-167b-45cd-ab9c-f987fa262040
 // --------------------------------------------------------------------------------
 param environmentCode string = 'dev'
 param location string = resourceGroup().location
@@ -69,7 +69,6 @@ module storageModule 'storageAccount.bicep' = {
     runDateTime: runDateTime
   }
 }
-
 module servicebusModule 'serviceBus.bicep' = {
   name: 'servicebus${deploymentSuffix}'
   params: {
@@ -111,25 +110,6 @@ module dpsModule 'dps.bicep' = {
     runDateTime: runDateTime
   }
 }
-var cosmosContainerArray = [
-  { name: 'DeviceData', partitionKey: '/partitionKey' }
-  { name: 'DeviceInfo', partitionKey: '/partitionKey' }
-]
-module cosmosModule 'cosmosDatabase.bicep' = {
-  name: 'cosmos${deploymentSuffix}'
-  params: {
-    containerArray: cosmosContainerArray
-    cosmosDatabaseName: 'IoTDatabase'
-
-    templateFileName: '~cosmosDatabase.bicep'
-    orgPrefix: orgPrefix
-    appPrefix: appPrefix
-    environmentCode: environmentCode
-    appSuffix: appSuffix
-    location: location
-    runDateTime: runDateTime
-  }
-}
 module signalRModule 'signalR.bicep' = {
   name: 'signalR${deploymentSuffix}'
   params: {
@@ -150,6 +130,26 @@ module streamingModule 'streaming.bicep' = {
     svcBusQueueName: 'iotmsgs'
 
     templateFileName: '~streaming.bicep'
+    orgPrefix: orgPrefix
+    appPrefix: appPrefix
+    environmentCode: environmentCode
+    appSuffix: appSuffix
+    location: location
+    runDateTime: runDateTime
+  }
+}
+
+var cosmosContainerArray = [
+  { name: 'DeviceData', partitionKey: '/partitionKey' }
+  { name: 'DeviceInfo', partitionKey: '/partitionKey' }
+]
+module cosmosModule 'cosmosDatabase.bicep' = {
+  name: 'cosmos${deploymentSuffix}'
+  params: {
+    containerArray: cosmosContainerArray
+    cosmosDatabaseName: 'IoTDatabase'
+
+    templateFileName: '~cosmosDatabase.bicep'
     orgPrefix: orgPrefix
     appPrefix: appPrefix
     environmentCode: environmentCode
@@ -217,6 +217,7 @@ module keyVaultModule 'keyVault.bicep' = {
 }
 module keyVaultSecretsModule 'keyVaultSecrets.bicep' = {
   name: 'keyvaultSecrets${deploymentSuffix}'
+  dependsOn: [ keyVaultModule ]
   params: {
     keyVaultName: keyVaultName
     cosmosAccountName: cosmosModule.outputs.cosmosAccountName
