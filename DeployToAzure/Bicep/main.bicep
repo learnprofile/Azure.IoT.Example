@@ -1,6 +1,5 @@
 // --------------------------------------------------------------------------------
 // Main file that deploys all Azure Resources for one environment
-// TODO: Bug - fails if resource group doesn't exist...  need to put that in here!
 // --------------------------------------------------------------------------------
 // To deploy this Bicep manually:
 // 	 az login
@@ -23,8 +22,7 @@ param keyVaultOwnerUserId2 string = ''
 param runDateTime string = utcNow()
 
 // --------------------------------------------------------------------------------
-var deploymentSuffix = '-deploy-${runDateTime}'
-var keyVaultName = '${orgPrefix}${appPrefix}vault${environmentCode}${appSuffix}'
+var deploymentSuffix = '-${runDateTime}'
 
 // --------------------------------------------------------------------------------
 // TODO: I need a way to create a resource group here, but these don't work yet...!
@@ -204,7 +202,6 @@ module keyVaultModule 'keyVault.bicep' = {
   params: {
     adminUserObjectIds: adminUserIds
     applicationUserObjectIds: applicationUserIds
-    keyVaultName: keyVaultName
 
     templateFileName: '~keyVault.bicep'
     orgPrefix: orgPrefix
@@ -219,7 +216,7 @@ module keyVaultSecretsModule 'keyVaultSecrets.bicep' = {
   name: 'keyvaultSecrets${deploymentSuffix}'
   dependsOn: [ keyVaultModule ]
   params: {
-    keyVaultName: keyVaultName
+    keyVaultName: keyVaultModule.outputs.keyVaultName
     cosmosAccountName: cosmosModule.outputs.cosmosAccountName
     functionInsightsKey: functionModule.outputs.functionInsightsKey
     iotHubName: iotHubModule.outputs.iotHubName
@@ -238,12 +235,12 @@ module functionAppSettingsModule './functionAppSettings.bicep' = {
     functionStorageAccountName: functionModule.outputs.functionStorageAccountName
     functionInsightsKey: functionModule.outputs.functionInsightsKey
     customAppSettings: {
-      ServiceBusConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=serviceBusConnectionString)'
-      'MySecrets:IoTHubConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotHubConnectionString)'
-      'MySecrets:SignalRConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=signalRConnectionString)'
-      'MySecrets:ServiceBusConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=serviceBusConnectionString)'
-      'MySecrets:CosmosConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=cosmosConnectionString)'
-      'MySecrets:IotStorageAccountConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotStorageAccountConnectionString)'
+      ServiceBusConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.keyVaultName};SecretName=serviceBusConnectionString)'
+      'MySecrets:IoTHubConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.keyVaultName};SecretName=iotHubConnectionString)'
+      'MySecrets:SignalRConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.keyVaultName};SecretName=signalRConnectionString)'
+      'MySecrets:ServiceBusConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.keyVaultName};SecretName=serviceBusConnectionString)'
+      'MySecrets:CosmosConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.keyVaultName};SecretName=cosmosConnectionString)'
+      'MySecrets:IotStorageAccountConnectionString': '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.keyVaultName};SecretName=iotStorageAccountConnectionString)'
       'MyConfiguration:WriteToCosmosYN': 'Y'
       'MyConfiguration:WriteToSignalRYN': 'N'
     }
@@ -257,11 +254,11 @@ module webSiteAppSettingsModule './webSiteAppSettings.bicep' = {
     webAppName: webSiteModule.outputs.webSiteName
     customAppSettings: {
       EnvironmentName: environmentCode
-      IoTHubConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotHubConnectionString)'
-      StorageConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=iotStorageAccountConnectionString)'
-      CosmosConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=cosmosConnectionString)'
-      SignalRConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=signalRConnectionString)'
-      ApplicationInsightsKey: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=webSiteInsightsKey)'
+      IoTHubConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.keyVaultName};SecretName=iotHubConnectionString)'
+      StorageConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.keyVaultName};SecretName=iotStorageAccountConnectionString)'
+      CosmosConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.keyVaultName};SecretName=cosmosConnectionString)'
+      SignalRConnectionString: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.keyVaultName};SecretName=signalRConnectionString)'
+      ApplicationInsightsKey: '@Microsoft.KeyVault(VaultName=${keyVaultModule.outputs.keyVaultName};SecretName=webSiteInsightsKey)'
     }
   }
 }

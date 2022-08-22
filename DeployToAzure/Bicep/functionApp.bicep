@@ -153,7 +153,7 @@ resource functionAppResource 'Microsoft.Web/sites@2021-03-01' = {
 //             'index.php'
 //             'hostingstart.html'
 //         ]
-//         netFrameworkVersion: 'v6.0'
+//         netFrameworkVersion: 'v4.0'
 //         linuxFxVersion: 'dotnet|6.0'
 //         requestTracingEnabled: false
 //         remoteDebuggingEnabled: false
@@ -190,7 +190,7 @@ resource functionAppResource 'Microsoft.Web/sites@2021-03-01' = {
 //             supportCredentials: false
 //         }
 //         localMySqlEnabled: false
-//         ipSecuriyRestrictions: [
+//         ipSecurityRestrictions: [
 //             {
 //                 ipAddress: 'Any'
 //                 action: 'Allow'
