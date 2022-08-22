@@ -194,14 +194,12 @@ module webSiteModule 'webSite.bicep' = {
   }
 }
 
-var adminUserIds = [ keyVaultOwnerUserId1, keyVaultOwnerUserId2 ]
-var applicationUserIds = [ functionModule.outputs.functionAppPrincipalId, webSiteModule.outputs.websiteAppPrincipalId ]
 module keyVaultModule 'keyVault.bicep' = {
   name: 'keyvault${deploymentSuffix}'
   dependsOn: [ functionModule, webSiteModule ]
   params: {
-    adminUserObjectIds: adminUserIds
-    applicationUserObjectIds: applicationUserIds
+    adminUserObjectIds: [ keyVaultOwnerUserId1, keyVaultOwnerUserId2 ]
+    applicationUserObjectIds: [ functionModule.outputs.functionAppPrincipalId, webSiteModule.outputs.websiteAppPrincipalId ]
 
     templateFileName: '~keyVault.bicep'
     orgPrefix: orgPrefix
